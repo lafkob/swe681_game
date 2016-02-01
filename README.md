@@ -22,5 +22,3 @@ gradle java resources - haven't looked through this too much, gradle docs on usi
 
 gradle eclipse integration - haven't run through this yet
 - https://docs.gradle.org/current/userguide/eclipse_plugin.html
-
-This is a test.
