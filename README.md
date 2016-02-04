@@ -20,5 +20,5 @@ some gradle basics - ran some of these without using their project, it just has 
 gradle java resources - haven't looked through this too much, gradle docs on using it with java
 - http://gradle.org/getting-started-gradle-java/
 
-gradle eclipse integration - haven't run through this yet
-- https://docs.gradle.org/current/userguide/eclipse_plugin.html
+gradle eclipse plugin - this looks like what I was looking for, to control gradle from eclipse
+- https://marketplace.eclipse.org/content/gradle-integration-eclipse-0
