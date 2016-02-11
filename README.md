@@ -21,4 +21,5 @@ gradle java resources - haven't looked through this too much, gradle docs on usi
 - http://gradle.org/getting-started-gradle-java/
 
 gradle eclipse plugin - this looks like what I was looking for, to control gradle from eclipse
-- https://marketplace.eclipse.org/content/gradle-integration-eclipse-0
+- https://marketplace.eclipse.org/content/gradle-integration-eclipse-0  ** this one only works in eclipse mars and older (neon is the bleeding edge one I installed)
+- https://marketplace.eclipse.org/content/gradle-ide-pack ** I'm evaluating this one because it installed in eclipse neon
