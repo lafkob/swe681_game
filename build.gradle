@@ -25,7 +25,9 @@ dependencies {
 	// double check these are all needed
 	compile 'org.springframework:spring-core:4.2.4.RELEASE'
 	compile 'org.springframework:spring-webmvc:4.2.4.RELEASE'
-	compile 'javax.servlet:javax.servlet-api:3.1.0' // TODO: this needs to be provided!
+	compile 'org.springframework.security:spring-security-web:4.0.4.RELEASE'
+	compile 'org.springframework.security:spring-security-config:4.0.4.RELEASE'
+	providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
 
     // The production code uses the SLF4J logging API at compile time
     compile 'org.slf4j:slf4j-api:1.7.13'
