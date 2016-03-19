@@ -26,5 +26,4 @@ public class ApplicationInitializer implements WebApplicationInitializer {
         context.scan("edu.swe681.traverse.config");
         return context;
     }
-
 }
