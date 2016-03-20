@@ -8,8 +8,7 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
 import edu.swe681.traverse.config.RootConfiguration;
 import edu.swe681.traverse.config.WebMvcConfiguration;
 
-public class ApplicationInitializer extends
-AbstractAnnotationConfigDispatcherServletInitializer {
+public class ApplicationInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 	@Override
 	protected Class<?>[] getRootConfigClasses() {
 		return new Class[] { RootConfiguration.class };
