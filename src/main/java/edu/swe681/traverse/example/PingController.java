@@ -17,6 +17,7 @@ public class PingController {
 	@RequestMapping(value="/api/ping", method = RequestMethod.GET)
 	@ResponseBody
 	public String ping(){
+		LOG.debug("Executed ping.\n");
 		
 		return "System up";
 	}
