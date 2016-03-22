@@ -11,13 +11,13 @@ import org.slf4j.LoggerFactory;
 @Controller
 public class PingController {
 
-	private static final Logger LOG = 
-			LoggerFactory.getLogger(PingController.class);
+	private static final Logger LOG = LoggerFactory.getLogger("audit");
 	
 	@RequestMapping(value="/api/ping", method = RequestMethod.GET)
 	@ResponseBody
 	public String ping(){
-		LOG.debug("Executed ping.\n");
+		LOG.debug("Executed ping.");
+		LOG.info("This is a {}", "test");
 		
 		return "System up";
 	}
