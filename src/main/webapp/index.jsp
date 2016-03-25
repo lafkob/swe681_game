@@ -1,38 +1,28 @@
 <html>
 <head>
 <title>Index Page for Traverse</title>
+<script type="text/javascript" src="js/lib/jquery-2.2.2.min.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
 </head>
 
 <body>
-	<% // TODO: obviously these are just garbage controls to call the REST endpoints  %>
-	
-	<form action="./api/game/join" method="post">
-		<input name="id" />
-		<input type="submit" value="Join game" />
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-	</form>
-	
-	
-	<form action="./api/game/status" method="post">
-		<input name="id" />
-		<input type="submit" value="Game status" />
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-	</form>
-	
-	
-	<form action="./api/game/move" method="post">
-		<input type="submit" value="Make move" />
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-	</form>
-	
-	<form action="./api/ping" methods="get">
-		<input type="submit" value="Ping server" />
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-	</form>
+	<%
+		// TODO: obviously these are just garbage controls to call the REST endpoints
+	%>
 
+	Game ID: <input id="gameId" /> 
+	<br/>
+	<input type="button" id="joinBtn" value="Join game" />
+	<input type="button" id="statusBtn" value="Game status" /></form>
+	<input type="button" id="moveBtn" value="Make move" />
+	<br/><br/>
+	<input type="button" id="pingBtn" value="Ping server" />
+	<br/><br/>
 	<form action="./logout" method="post">
-		<input type="submit" value="Log out" />
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+		<input type="submit" id="logoutBtn" value="Log out" /> <input type="hidden"
+			name="${_csrf.parameterName}" value="${_csrf.token}" />
 	</form>
+	
+	<div id="reqResult"></div>
 </body>
 </html>
