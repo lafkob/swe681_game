@@ -6,6 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.Ordered;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -23,6 +24,12 @@ public class WebMvcConfiguration extends WebMvcConfigurerAdapter {
         converters.add(new MappingJackson2HttpMessageConverter());
         super.configureMessageConverters(converters);
     }
+	
+	@Override
+	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+		// force content negotiation to happen with accept headers as HTTP was designed
+		configurer.favorPathExtension(false).favorParameter(false);
+	};
 
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
