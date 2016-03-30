@@ -1,10 +1,10 @@
 package edu.swe681.traverse.rest;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import edu.swe681.traverse.rest.dto.JoinRequestDto;
 import edu.swe681.traverse.rest.dto.MoveRequestDto;
@@ -13,7 +13,7 @@ import edu.swe681.traverse.rest.dto.StatusRequestDto;
 /**
  * REST controller for the game API.
  */
-@Controller
+@RestController
 @RequestMapping(value="/api/game")
 public class TraverseRestController {
 	

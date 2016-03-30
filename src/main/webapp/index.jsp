@@ -20,7 +20,7 @@
 	<br/><br/>
 	<form action="./logout" method="post">
 		<input type="submit" id="logoutBtn" value="Log out" /> <input type="hidden"
-			name="${_csrf.parameterName}" value="${_csrf.token}" />
+			id="_csrf_token" name="${_csrf.parameterName}" value="${_csrf.token}" />
 	</form>
 	
 	<div id="reqResult"></div>

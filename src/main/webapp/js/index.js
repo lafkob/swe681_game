@@ -1,11 +1,14 @@
 $(function() {
 	$('#joinBtn').click(function() {
+		reqData = {};
+		reqData.gameId = $("#gameId").val();
 		$.ajax({
 			type : "POST",
 			url : "./api/game/join",
-			data : { gameId: $("#gameId").val() },
+			data : JSON.stringify(reqData),
+			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
 			success : function(data, status, jqXHR) {
-				
+				$("div#reqResult").html(data);
 			},
 			error: utils.requestErrorHandler,
 			dataType : 'json',
@@ -15,12 +18,15 @@ $(function() {
 	});
 
 	$('#statusBtn').click(function() {
+		reqData = {};
+		reqData.gameId = $("#gameId").val();
 		$.ajax({
 			type : "POST",
 			url : "./api/game/status",
-			data : {},
+			data : JSON.stringify(reqData),
+			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
 			success : function(data, status, jqXHR) {
-				
+				$("div#reqResult").html(data);
 			},
 			error: utils.requestErrorHandler,
 			dataType : 'json',
@@ -30,12 +36,15 @@ $(function() {
 	});
 
 	$('#moveBtn').click(function() {
+		reqData = {};
+		reqData.gameId = $("#gameId").val();
 		$.ajax({
 			type : "POST",
 			url : "./api/game/move",
-			data : {},
+			data : JSON.stringify(reqData),
+			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
 			success : function(data, status, jqXHR) {
-				
+				$("div#reqResult").html(data);
 			},
 			error: utils.requestErrorHandler,
 			dataType : 'json',
