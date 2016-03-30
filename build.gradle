@@ -37,3 +37,11 @@ dependencies {
     
     testCompile 'org.springframework:spring-test:4.2.5.RELEASE'
 }
+
+sourceSets {
+	test {
+		java {
+			srcDirs = ["test/model"]
+		}
+	}
+}

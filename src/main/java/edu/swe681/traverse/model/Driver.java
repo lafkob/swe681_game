@@ -16,10 +16,6 @@ public class Driver {
 		BufferedReader br;
 		GameBoard board, newBoard;
 		String input;
-		String[] tokens;
-		Point start, dest;
-		List<Point> dests;
-		int numDests;
 		
 		board = new GameBoard(false);
 		
@@ -31,42 +27,25 @@ public class Driver {
 			System.out.println("What move, Player " + board.getCurrentState().getPlayer() + "?");
 			while(!((input=br.readLine()).equals("q")))
 			{
-				tokens = input.split("[ ]+");
-				if (tokens.length % 2 == 0 && tokens.length >= 4)
+				newBoard = null;
+				try
 				{
-					start = new Point(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]));
-					
-					numDests = (tokens.length - 2) / 2;
-					dests = new ArrayList<Point>();
-					for (int i = 0; i < numDests; i++)
-					{
-						dest = new Point(Integer.parseInt(tokens[(i*2)+2]), 
-								Integer.parseInt(tokens[(i*2)+3]));
-						dests.add(dest);
-					}
-					
-					newBoard = null;
-					try
-					{
-						newBoard = board.movePiece(start, dests);
-					}
-					catch (IllegalMoveException ime)
-					{
-						System.out.println(ime.getMessage());
-					}
-					catch (InvalidMoveException ime)
-					{
-						System.out.println(ime.getMessage());
-					}
-					
-					if (newBoard != null)
-					{
-						board = newBoard;
-						System.out.println("\n" + board);
-					}
+					newBoard = parseAndMakeMove(board, input);
 				}
-				else
-					System.out.println("Invalid number of tokens.\n");
+				catch (IllegalMoveException ime)
+				{
+					System.out.println(ime.getMessage());
+				}
+				catch (InvalidMoveException ime)
+				{
+					System.out.println(ime.getMessage());
+				}
+				
+				if (newBoard != null)
+				{
+					board = newBoard;
+					System.out.println("\n" + board);
+				}
 				
 				System.out.println("What move, Player " + board.getCurrentState().getPlayer() + "?");
 			}
@@ -77,5 +56,32 @@ public class Driver {
 			io.printStackTrace();
 		}
 	}
-
+	
+	private static GameBoard parseAndMakeMove(GameBoard board, String moveStr)
+			throws IllegalMoveException, InvalidMoveException
+		{
+			String[] tokens, subTokens;
+			int pieceID;
+			Point start;
+			List<Point> dests;
+			
+			tokens = moveStr.split(",");
+			
+			pieceID = Integer.parseInt(tokens[0]);
+			
+			subTokens = tokens[1].split(" ");
+			start = new Point(Integer.parseInt(subTokens[0]), Integer.parseInt(subTokens[1]));
+			
+			dests = new ArrayList<Point>();
+			if (tokens.length > 2)
+			{
+				subTokens = tokens[2].split(" ");
+				for (int i = 0; i < subTokens.length; i=i+2)
+				{
+					dests.add(new Point(Integer.parseInt(subTokens[i]), Integer.parseInt(subTokens[i+1])));
+				}
+			}
+			
+			return board.movePiece(pieceID, start, dests);		
+		}
 }

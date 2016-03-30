@@ -7,6 +7,8 @@ package edu.swe681.traverse.model;
  */
 public final class Game
 {	
+	public static final int NUM_PIECES = 16;
+	
 	public static final GamePiece [] PIECES = {
 		new GamePiece(GamePieceType.CIRCLE, Player.ONE),
 		new GamePiece(GamePieceType.CIRCLE, Player.ONE),
