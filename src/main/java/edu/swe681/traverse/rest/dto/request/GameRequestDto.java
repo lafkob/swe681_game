@@ -3,7 +3,7 @@ package edu.swe681.traverse.rest.dto.request;
 /**
  * Superclass for all game-centric requests. Gives functionality for gameId
  */
-public abstract class GameRequestDto {
+public class GameRequestDto {
 	private Long gameId;
 	
 	public GameRequestDto(){}

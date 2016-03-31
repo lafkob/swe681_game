@@ -38,6 +38,15 @@ public class GameRestController {
 		return new GameResponseDto(new Random().nextLong());
 	}
 	
+	
+	/**
+	 * Quits the player from the game specified by the gameId. Player
+	 * must be in the game already. Either forfeits them or kills a
+	 * game that is waiting to start.
+	 * 
+	 * @param dto Request containing the gameId
+	 * @return 200
+	 */
 	@RequestMapping(value="/quit", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<String> quitGame(@RequestBody GameRequestDto dto) {
@@ -51,8 +60,10 @@ public class GameRestController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
+	
+	// TODO: document
 	@RequestMapping(value="/join", method = RequestMethod.POST)
-	@ResponseBody // TODO remove this annotation, will use JSON
+	@ResponseBody
 	public GameStatusResponseDto joinGame(@RequestBody JoinRequestDto joinRequest) {
 		// TODO: get the user and make sure they are not already in a game
 		// TODO: update the game state to show this user in it
@@ -61,19 +72,25 @@ public class GameRestController {
 		return new GameStatusResponseDto(joinRequest.getGameId());
 	}
 
+
+	// TODO: document
 	@RequestMapping(value="/status", method = RequestMethod.POST)
-	@ResponseBody // TODO remove this annotation, will use JSON
-	public String getStatus(@RequestBody StatusRequestDto statusRequest) {
-		// TODO:
-		return "Status for game ID: " + statusRequest.getGameId();
+	@ResponseBody
+	public GameStatusResponseDto getStatus(@RequestBody StatusRequestDto statusRequest) {
+		// TODO: get the user and make sure they are in the game being requested
+		// TODO: get the game state and populate it fully
+		// TODO: audit the call?
+		return new GameStatusResponseDto(statusRequest.getGameId());
 	}
 	
+
+	// TODO: document
 	@RequestMapping(value="/move", method = RequestMethod.POST)
-	@ResponseBody // TODO remove this annotation, will use JSON
-	public String makeMove(@RequestBody MoveRequestDto moveRequest) {
-		// TODO:
-		return "Made a move for game: " + moveRequest.getGameId();
+	@ResponseBody
+	public GameStatusResponseDto makeMove(@RequestBody MoveRequestDto moveRequest) {
+		// TODO: get the user and make sure they are in the game for the move
+		// TODO: update the game state, exceptions will be thrown and handled globally
+		// TODO: audit the call
+		return new GameStatusResponseDto(moveRequest.getGameId());
 	}
-	
-	// TODO: want a forfeit/quit endpoint?
 }

@@ -6,9 +6,7 @@ $(function() {
 			url : "./api/game/start",
 			data : JSON.stringify(reqData),
 			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
-			success : function(data, status, jqXHR) {
-				$("div#reqResult").html(JSON.stringify(data));
-			},
+			success : utils.jsonSuccessHandler,
 			error: utils.requestErrorHandler,
 			dataType : 'json',
 			contentType: 'application/json'
@@ -24,9 +22,7 @@ $(function() {
 			url : "./api/game/join",
 			data : JSON.stringify(reqData),
 			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
-			success : function(data, status, jqXHR) {
-				$("div#reqResult").html(data);
-			},
+			success : utils.jsonSuccessHandler,
 			error: utils.requestErrorHandler,
 			dataType : 'json',
 			contentType: 'application/json'
@@ -42,9 +38,7 @@ $(function() {
 			url : "./api/game/status",
 			data : JSON.stringify(reqData),
 			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
-			success : function(data, status, jqXHR) {
-				$("div#reqResult").html(data);
-			},
+			success : utils.jsonSuccessHandler,
 			error: utils.requestErrorHandler,
 			dataType : 'json',
 			contentType: 'application/json'
@@ -60,9 +54,7 @@ $(function() {
 			url : "./api/game/move",
 			data : JSON.stringify(reqData),
 			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
-			success : function(data, status, jqXHR) {
-				$("div#reqResult").html(data);
-			},
+			success : utils.jsonSuccessHandler,
 			error: utils.requestErrorHandler,
 			dataType : 'json',
 			contentType: 'application/json'
@@ -75,14 +67,11 @@ $(function() {
 		reqData.gameId = $("#gameId").val();
 		$.ajax({
 			type : "POST",
-			url : "./api/game/start",
+			url : "./api/game/quit",
 			data : JSON.stringify(reqData),
 			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
-			success : function(data, status, jqXHR) {
-				$("div#reqResult").html(status);
-			},
+			success : utils.jsonSuccessHandler,
 			error: utils.requestErrorHandler,
-			dataType : 'json',
 			contentType: 'application/json'
 		});
 		return false;
@@ -106,5 +95,11 @@ $(function() {
 utils = {
 	requestErrorHandler: function(jqXHR, textStatus, errorThrown){
 		$("div#reqResult").html("<b>Error</b><br/>" + textStatus + "<br/>" + errorThrown);
+	},
+	
+	jsonSuccessHandler: function(data, status, jqXHR){
+		message = "<b>Status:</b> " + jqXHR.status + " (" + status + ")";
+		if(data) message += "<br/>" + JSON.stringify(data);
+		$("div#reqResult").html(message);
 	}
 };
