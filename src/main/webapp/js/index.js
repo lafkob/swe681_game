@@ -1,4 +1,21 @@
 $(function() {
+	$('#startBtn').click(function() {
+		reqData = {};
+		$.ajax({
+			type : "POST",
+			url : "./api/game/start",
+			data : JSON.stringify(reqData),
+			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
+			success : function(data, status, jqXHR) {
+				$("div#reqResult").html(JSON.stringify(data));
+			},
+			error: utils.requestErrorHandler,
+			dataType : 'json',
+			contentType: 'application/json'
+		});
+		return false;
+	});
+	
 	$('#joinBtn').click(function() {
 		reqData = {};
 		reqData.gameId = $("#gameId").val();
@@ -52,6 +69,24 @@ $(function() {
 		});
 		return false;
 	});
+	
+	$('#quitBtn').click(function() {
+		reqData = {};
+		reqData.gameId = $("#gameId").val();
+		$.ajax({
+			type : "POST",
+			url : "./api/game/start",
+			data : JSON.stringify(reqData),
+			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
+			success : function(data, status, jqXHR) {
+				$("div#reqResult").html(status);
+			},
+			error: utils.requestErrorHandler,
+			dataType : 'json',
+			contentType: 'application/json'
+		});
+		return false;
+	});
 
 	$('#pingBtn').click(function() {
 		$.ajax({
@@ -70,6 +105,6 @@ $(function() {
 
 utils = {
 	requestErrorHandler: function(jqXHR, textStatus, errorThrown){
-		$("div#reqResult").html("Error<br/>" + textStatus + "<br/>" + errorThrown);
+		$("div#reqResult").html("<b>Error</b><br/>" + textStatus + "<br/>" + errorThrown);
 	}
 };

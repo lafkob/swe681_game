@@ -1,4 +1,4 @@
-package edu.swe681.traverse.rest.dto;
+package edu.swe681.traverse.rest.dto.request;
 
 /**
  * Data for a game status request.
