@@ -1,8 +1,11 @@
-package edu.swe681.traverse.model;
+package edu.swe681.traverse.game;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import edu.swe681.traverse.game.enums.*;
+import edu.swe681.traverse.game.exception.*;
 
 /**
  * An immutable Traverse game board
@@ -18,7 +21,7 @@ public final class GameBoard
 	/* The size of the board. Note that if we were to add
 	 * two other players, we'd have to do quite a bit of adjusting
 	 * to the checks. */
-	private static final int SIZE = 10;
+	public static final int SIZE = 10;
 	private static final int EMPTY = -1;
 	private static final int STARTING_ROW_P1 = 0;
 	private static final int STARTING_ROW_P2 = SIZE - 1;
@@ -28,16 +31,14 @@ public final class GameBoard
 	private static final int STARTING_COL_P4 = SIZE - 1;
 	
 	private int board[][];
-	private GameState currentState;
+	private GameState gameState;
+	private int gameID;
+	private int playerOneID, playerTwoID;
+	
+	private MoveHistory p1History;
+	private MoveHistory p2History;
 	/* Tracks when jumps have been made in a series of moves */
 	private boolean jumpMade;
-	
-	/* Player blocking protection variables. This is super messy though..hmm
-	 * I've considered making a move object, but not sure it's worth it just for this. */
-	private Point oneDestAgoP1, twoDestAgoP1;
-	private Point oneDestAgoP2, twoDestAgoP2;
-	private int oneIDAgoP1, twoIDAgoP1;
-	private int oneIDAgoP2, twoIDAgoP2;
 	
 	/**
 	 * Default constructor. The game board begins with all
@@ -47,7 +48,7 @@ public final class GameBoard
 	 * @param shuffle Shuffles the starting locations if true,
 	 * 	does not otherwise
 	 */
-	public GameBoard(boolean shuffle)
+	public GameBoard(int gameID, int playerOneID, int playerTwoID, boolean shuffle)
 	{
 		board = new int[SIZE][SIZE];
 		for (int row = 0; row < SIZE; row++)
@@ -76,13 +77,14 @@ public final class GameBoard
 		if (shuffle)
 			shuffleStartingPos();
 		
-		this.currentState = new GameState(GameStatus.PLAY, Player.ONE);
+		this.playerOneID = playerOneID;
+		this.playerTwoID = playerTwoID;
 		
-		this.oneDestAgoP1 = this.twoDestAgoP1 = null;
-		this.oneIDAgoP1 = twoIDAgoP1 = -1;
+		this.gameState = new GameState(GameStatus.PLAY, playerOneID);
+		this.gameID = gameID;
 		
-		this.oneDestAgoP2 = this.twoDestAgoP2 = null;
-		this.oneIDAgoP2 = twoIDAgoP2 = -1;
+		this.p1History = new MoveHistory(null, -1, null, -1);
+		this.p2History = new MoveHistory(null, -1, null, -1);
 	}
 	
 	/**
@@ -104,21 +106,45 @@ public final class GameBoard
 		}
 		this.board = newBoard;
 		
-		this.currentState = new GameState(
+		this.gameID = oldBoard.gameID;
+		this.playerOneID = oldBoard.playerOneID;
+		this.playerTwoID = oldBoard.playerTwoID;
+		
+		this.gameState = new GameState(
 				oldBoard.getCurrentState().getStatus(),
-				oldBoard.getCurrentState().getPlayer());
+				oldBoard.getCurrentState().getCurrentPlayerID());
 				
 		this.jumpMade = oldBoard.jumpMade;
 		
-		this.oneDestAgoP1 = oldBoard.oneDestAgoP1;
-		this.twoDestAgoP1 = oldBoard.twoDestAgoP1;
-		this.oneIDAgoP1 = oldBoard.oneIDAgoP1;
-		this.twoIDAgoP1 = oldBoard.twoIDAgoP1;
+		this.p1History = new MoveHistory(oldBoard.p1History.getOneMoveAgo(),
+				oldBoard.p1History.getOneIDAgo(),
+				oldBoard.p1History.getTwoMoveAgo(),
+				oldBoard.p1History.getTwoIDAgo());
 		
-		this.oneDestAgoP2 = oldBoard.oneDestAgoP2;
-		this.twoDestAgoP2 = oldBoard.twoDestAgoP2;
-		this.oneIDAgoP2 = oldBoard.oneIDAgoP2;
-		this.twoIDAgoP2 = oldBoard.twoIDAgoP2;
+		this.p2History = new MoveHistory(oldBoard.p2History.getOneMoveAgo(),
+				oldBoard.p2History.getOneIDAgo(),
+				oldBoard.p2History.getTwoMoveAgo(),
+				oldBoard.p2History.getTwoIDAgo());
+	}
+	
+	/**
+	 * Requires: Board must be a valid Traverse board
+	 * Constructor creates a new GameBoard with the given board
+	 * 
+	 * @param gameID GameID for the board
+	 * @param board The game board layout
+	 */
+	public GameBoard(int gameID, int playerOneId, int playerTwoID, int[][] board)
+	{
+		this(gameID, playerOneId, playerTwoID, false);
+		
+		for (int row = 0; row < SIZE; row++)
+		{
+			for (int col = 0; col < SIZE; col++)
+			{
+				this.board[row][col] = board[row][col];
+			}
+		}
 	}
 	
 	/**
@@ -130,7 +156,37 @@ public final class GameBoard
 	{
 		/* Note: GameStates are immutable, so returning this as is
 		 * shouldn't be an issue. */
-		return currentState;
+		return this.gameState;
+	}
+	
+	/**
+	 * Return the game ID
+	 * 
+	 * @return The game ID
+	 */
+	public int getGameID()
+	{
+		return this.gameID;
+	}
+	
+	/**
+	 * Returns player one's ID
+	 * 
+	 * @return Player one's ID
+	 */
+	public int getPlayerOneID()
+	{
+		return this.playerOneID;
+	}
+	
+	/**
+	 * Return player two's ID
+	 * 
+	 * @return Player two's ID
+	 */
+	public int getPlayerTwoID()
+	{
+		return this.playerTwoID;
 	}
 	
 	/**
@@ -164,16 +220,12 @@ public final class GameBoard
 	 * 
 	 * @return A GameBoard with the turn advanced
 	 */
-	public GameBoard advanceTurn()
+	private void advanceTurn()
 	{
-		GameBoard newBoard = new GameBoard(this);
-		
-		if (currentState.getPlayer() == Player.ONE)
-			newBoard.currentState = newBoard.currentState.updatePlayer(Player.TWO);
+		if (gameState.getCurrentPlayerID() == playerOneID)
+			gameState = gameState.updatePlayer(playerTwoID);
 		else
-			newBoard.currentState = newBoard.currentState.updatePlayer(Player.ONE);
-		
-		return newBoard;
+			gameState = gameState.updatePlayer(playerOneID);
 	}
 	
 	/**
@@ -185,16 +237,24 @@ public final class GameBoard
 	 * @param dests A series of spaces in the move, ending at the final location
 	 * @return A GameBoard with the piece moved to its final location
 	 * 
-	 * @throws InvalidMoveException If the move(s) are invalid
-	 * @throws IllegalMoveException If the move(s) are illegal
+	 * @throws TraverseException If the move(s) are illegal
 	 */
-	public GameBoard movePiece(int pieceID, Point start, List<Point> dests)
-		throws InvalidMoveException, IllegalMoveException
+	public GameBoard movePiece(int pieceID, List<Point> dests)
+		throws TraverseException
 	{
 		GameBoard newBoard;
 		Point midway, dest;
+		Point start;
+		
+		/* The piece must be between 0 and NUM_PIECES(16).*/
+		if (!(pieceID >= 0 && pieceID < Game.NUM_PIECES))
+		{
+			throw new InvalidInputException(String.format("The given piece ID (%d) is "
+				+ "invalid.", pieceID));
+		}
 		
 		newBoard = new GameBoard(this);
+		start = getPieceLocation(pieceID);
 		
 		/* Make sure the initial conditions valid before evaluating
 		 * the individual moves. */
@@ -218,7 +278,7 @@ public final class GameBoard
 			/* Currently, we will start in the play stage and randomize the
 			 * starting pieces. In the future, we may allow players to rearrange
 			 * their starting locations. */
-			if (currentState.getStatus()== GameStatus.START)
+			if (gameState.getStatus()== GameStatus.START)
 			{
 				newBoard.validateStartMove(start, dest);
 				
@@ -230,13 +290,12 @@ public final class GameBoard
 				newBoard.board[midway.x][midway.y] = temp;
 				*/
 			}
-			if (currentState.getStatus()== GameStatus.PLAY)
+			if (gameState.getStatus()== GameStatus.PLAY)
 			{
 				/* Every move after the first move must have followed a jump move */
 				if (moveNum > 0 && !newBoard.jumpMade)
 				{
-					throw new IllegalMoveException("You can only move additional spaces if the last "
-							+ "move was a jump.", midway, dest);
+					throw new IllegalMultiMoveException("", midway, dest);
 				}
 				
 				newBoard.validatePlayMove(pieceID, midway, dest);
@@ -248,39 +307,9 @@ public final class GameBoard
 			}
 		}
 		
-		return newBoard;
-	}
-	
-	/**
-	 * Returns a GameBoard with the piece at the given location moved
-	 * to the final destination.
-	 * 
-	 * @param start Piece's starting location
-	 * @param dests A series of spaces in the move, ending at the final location
-	 * @return A GameBoard with the piece moved to its final location
-	 * 
-	 * @throws InvalidMoveException If the move(s) are invalid
-	 * @throws IllegalMoveException If the move(s) are illegal
-	 */
-	public GameBoard movePiece(Point start, List<Point> dests)
-			throws InvalidMoveException, IllegalMoveException
-	{
-		/* I didn't really want to repeat these, but I wanted the out of bounds messages
-		 * to be consistent, which required the destination to be present, which in turn
-		 * required me to check if they were empty. */
-		if (dests.isEmpty())
-		{
-			throw new InvalidMoveException("Moves are incomplete. No destinations provided.");
-		}
+		newBoard.advanceTurn();
 		
-		if (!(start.x >= 0 && start.x < SIZE &&
-			  start.y >= 0 && start.y < SIZE))
-		{
-			throw new InvalidMoveException(String.format("The location [%d,%d] is not "
-					+ "on the board.", start.x, start.y), start, dests.get(0));
-		}
-			
-		return this.movePiece(board[start.x][start.y], start, dests);
+		return newBoard;
 	}
 	
 	/**
@@ -289,55 +318,31 @@ public final class GameBoard
 	 * 
 	 * @param pieceID Piece to be moved
 	 * @param start Piece's starting location
-	 * @param finalDest The Piece's final destination
+	 * @param dests A series of moves for the piece
 	 * 
-	 * @throws InvalidMoveException If the piece or starting location is invalid
-	 * @throws IllegalMoveException If the piece or starting location is illegal
+	 * @throws TraverseException If the piece or starting location is illegal
 	 */
 	private void validateGeneralConditions(int pieceID, Point start, List<Point> dests)
-		throws InvalidMoveException, IllegalMoveException
+		throws TraverseException
 	{			
 		/* The destinations are empty. I assume this should be weeded out in the filtering outside,
 		 * but just in case... */
 		if (dests.isEmpty())
 		{
-			throw new InvalidMoveException("Moves are incomplete. No destinations provided.");
-		}
-		
-		/* Start is out of bounds */
-		if (!(start.x >= 0 && start.x < SIZE &&
-			  start.y >= 0 && start.y < SIZE))
-		{
-			throw new InvalidMoveException(String.format("The location [%d,%d] is not "
-					+ "on the board.", start.x, start.y), start, dests.get(0));
-		}
-		
-		/* If the piece ID is not 0-NUM_PIECES(15), then something has gone wrong or there is no piece at
-		 * that location. */
-		if (!(pieceID >= 0 && pieceID < Game.NUM_PIECES))
-		{
-			if (pieceID == EMPTY)
-				throw new InvalidMoveException(String.format("Invalid move. The location"
-						+ " [%d,%d] is empty.", start.x, start.y));
-			else
-				throw new InvalidMoveException(String.format("The given piece ID (%d) is "
-						+ "invalid.", pieceID));
-		}
-		
-		/* Piece is not where the player expects it to be */
-		if (board[start.x][start.y] != pieceID)
-		{
-			throw new InvalidMoveException(String.format("The selected piece and"
-					+ " the starting location [%d,%d] do not match.", start.x, start.y));
+			throw new InvalidInputException("Moves are incomplete. No destinations provided.");
 		}
 		
 		/* That is not the player's piece */
 		GamePiece piece = Game.PIECES[pieceID];
-		if (piece.getPlayer() != currentState.getPlayer())
+		Player currentPlayer;
+		if (gameState.getCurrentPlayerID() == playerOneID)
+			currentPlayer = Player.ONE;
+		else
+			currentPlayer = Player.TWO;
+		if (piece.getPlayer() != currentPlayer)
 		{
-			throw new IllegalMoveException(String.format("Illegal piece selection "
-					+ "at location [%d,%d]. That is PLAYER %s\'s piece.", 
-					start.x, start.y, piece.getPlayer()));
+			throw new IllegalPieceSelectionException(String.format("Illegal piece selection. "
+					+ "That is PLAYER %s\'s piece.", piece.getPlayer()));
 		}
 		
 		/* A pieces's final destination cannot be within any starting area unless it
@@ -345,9 +350,8 @@ public final class GameBoard
 		 * One can never end in the corners. */
 		if (violatesEndInStartingLineRule(start, dests))
 		{
-			throw new IllegalMoveException("Illegal series of moves. A piece cannot end in a "
-					+ "starting line unless it is your starting line and you began your "
-					+ "move there or it is your goal line.");
+			throw new IllegalAreaException("Illegal series of moves. Your move may not end in a "
+					+ "starting line unless you began your move there or it is your goal line.");
 		}
 		
 		/* If the other player has an empty starting line and the current player does not,
@@ -355,9 +359,9 @@ public final class GameBoard
 		 * one from the starting line, if possible. */
 		if (violatesOpponentEmptyStartingLineRule(start))
 		{
-			throw new IllegalMoveException("If your opponent's row is empty, "
-					+ "yours is not, and any of those pieces can move, you "
-					+ "must move them first.");
+			throw new AlternateMoveRequiredException("You must choose an alternate move. "
+					+ "If your opponent's row is empty, yours is not, and pieces in your "
+					+ "starting row can move, you must move them first.");
 		}
 		
 		/* A player is not allowed to end on the same square (with the same piece) they were
@@ -365,10 +369,9 @@ public final class GameBoard
 		 * their opponent indefinitely. The exception is if it's the last move they can make. */
 		if (violatesBacktrackRule(pieceID, dests))
 		{
-			throw new IllegalMoveException(String.format("Illegal move to final destination [%d,%d] "
-					+ "with the current piece. You may not backtrack to the same location with "
-					+ "the same piece unless it is your last possible move.", 
-					dests.get(dests.size()-1).x, dests.get(dests.size()-1).y));
+			throw new AlternateMoveRequiredException(String.format("You must choose an alternate "
+					+ "move. You ended piece %d in location [%d,%d] two turns ago and may not "
+					+ "backtrack", pieceID, dests.get(dests.size()-1).x, dests.get(dests.size()-1).y));
 		}
 	}
 	
@@ -380,23 +383,23 @@ public final class GameBoard
 	 * @param start Piece's starting location
 	 * @param dest Location to which the piece is moving
 	 * 
-	 * @throws IllegalMoveException If the move is illegal
+	 * @throws TraverseException If the move is illegal
 	 */
 	private void validateStartMove(Point start, Point dest)
-		throws IllegalMoveException
+		throws TraverseException
 	{
 		int row;
 		
 		/* If we're just stating out, pieces can be swapped with each other,
 		 * but only within their row */
-		if (currentState.getPlayer() == Player.ONE)
+		if (gameState.getCurrentPlayerID() == playerOneID)
 			row = 0;
-		else
+		else /* Player two */
 			row = SIZE - 1;
 		
 		if (start.x != row || dest.x != row)
 		{
-			throw new IllegalMoveException("Illegal move. You may only move within your "
+			throw new IllegalStartingMoveException("Illegal move. You may only move within your "
 					+ "starting line.");
 		}
 	}
@@ -409,11 +412,11 @@ public final class GameBoard
 	 * @param pieceID Piece to be moved
 	 * @param start Piece's starting location
 	 * @param dest Location to which the piece is moving
-	 * @throws IllegalMoveException If the move is illegal
-	 * @throws InvalidMoveException If the move is invalid
+	 * 
+	 * @throws TraverseException If the move is illegal
 	 */
 	private void validatePlayMove(int pieceID, Point start, Point dest)
-		throws IllegalMoveException, InvalidMoveException
+		throws TraverseException
 	{
 		GamePiece piece;
 		int playerSign;
@@ -426,27 +429,26 @@ public final class GameBoard
 		if (!(start.x >= 0 && start.x < SIZE &&
 			  start.y >= 0 && start.y < SIZE))
 		{
-			throw new InvalidMoveException(String.format("The location [%d,%d] is not "
+			throw new InvalidInputException(String.format("The location [%d,%d] is not "
 					+ "on the board.", start.x, start.y), start, dest);
 		}
 		if (!(dest.x >= 0 && dest.x < SIZE &&
 			  dest.y >= 0 && dest.y < SIZE))
 		{
-			throw new InvalidMoveException(String.format("The location [%d,%d] is not "
+			throw new InvalidInputException(String.format("The location [%d,%d] is not "
 					+ "on the board.", dest.x, dest.y), start, dest);
 		}
 		
 		/* Probably shouldn't just move the piece to the same location */
 		if (start.equals(dest))
 		{
-			throw new IllegalMoveException("The piece has not been moved.", start, dest);
+			throw new IllegalMoveException("", start, dest);
 		}
 		
 		/* Another piece is already at the destination */
 		if (board[dest.x][dest.y] >= 0)
 		{
-			throw new IllegalMoveException("There is already a piece at that location.",
-					start, dest);
+			throw new IllegalAreaException("", start, dest);
 		}
 		
 		piece = Game.PIECES[pieceID];
@@ -454,8 +456,7 @@ public final class GameBoard
 		/* Check to make sure they're moving only one space or jumping a piece. */
 		if (!isMovingLegalDistance(start, dest))
 		{
-			throw new IllegalMoveException("Pieces may only move one space or jump "
-					+ "over another piece.", start, dest);
+			throw new IllegalMoveException("", start, dest);
 		}
 		
 		/* Check to make sure the direction is valid */
@@ -467,8 +468,7 @@ public final class GameBoard
 			 * is - if the condition is not met, then this is illegal. */
 			if (!(start.x == dest.x || start.y == dest.y))
 			{
-				throw new IllegalMoveException("A square may only move verically or "
-						+ "horizontally.", start, dest);
+				throw new IllegalMoveException("", start, dest);
 			}
 		}
 		
@@ -478,8 +478,7 @@ public final class GameBoard
 			/* Valid direction for a diamond? */
 			if (!(Math.abs(dest.x - start.x) == Math.abs(dest.y - start.y)))
 			{
-				throw new IllegalMoveException("A diamond may only move diagonally.",
-						start, dest);
+				throw new IllegalMoveException("", start, dest);
 			}
 		}
 		/* Triangles can move forward diagonally or straight backwards */
@@ -498,8 +497,7 @@ public final class GameBoard
 				!(Math.abs(dest.x - start.x) == Math.abs(dest.y - start.y) &&
 				 (dest.x - start.x)*playerSign > 0))
 			{
-				throw new IllegalMoveException("A triangle may only move forward "
-						+ "diagonally or straight backwards.", start, dest);
+				throw new IllegalMoveException("", start, dest);
 			}
 		}
 		
@@ -516,7 +514,7 @@ public final class GameBoard
 	 * @return True if the move is legal, false otherwise
 	 */
 	private boolean isMovingLegalDistance(Point start, Point dest)
-		throws IllegalMoveException
+		throws TraverseException
 	{
 		int signNumX, signNumY;
 		
@@ -546,9 +544,7 @@ public final class GameBoard
 		{
 			/* If a jump has already been made, then can't move single spaces */
 			if (this.jumpMade)
-				throw new IllegalMoveException("Piece must jump another piece to continue "
-						+ "moving.",
-					start, dest);
+				throw new IllegalMultiMoveException("", start, dest);
 		}
 		else
 		{
@@ -564,9 +560,7 @@ public final class GameBoard
 	 * @param player A player
 	 * @return True if the given player has won, false otherwise
 	 */
-	public boolean playerHasWon(Player player)
 	{
-		if (player == Player.ONE)
 		{
 			for (int col = 1; col < SIZE-1; col++)
 			{
@@ -635,7 +629,7 @@ public final class GameBoard
 	 */
 	private boolean otherMovesAreAvailable(int excludedPieceID)
 	{
-		if (currentState.getPlayer() == Player.ONE)
+		if (gameState.getCurrentPlayerID() == playerOneID)
 		{
 			for (int i = 0; i < 8; i++)
 			{
@@ -712,8 +706,8 @@ public final class GameBoard
 						}
 						/* I know it's generally bad practice to not check an exception,
 						 * but for this purpose, we only need to know if it doesn't throw
-						 * one of the exceptions. */
-						catch (IllegalMoveException | InvalidMoveException ime){}
+						 * one of the exceptions. If it doesn't, it's an available move. */
+						catch (TraverseException te){}
 					}
 				}
 			}
@@ -817,8 +811,8 @@ public final class GameBoard
 				(finalDest.y == STARTING_COL_P3 && start.y != STARTING_COL_P3) ||
 				(finalDest.y == STARTING_COL_P4 && start.y != STARTING_COL_P4);
 		inGoalLine =
-				(currentState.getPlayer() == Player.ONE && finalDest.x == STARTING_ROW_P2) ||
-				(currentState.getPlayer() == Player.TWO && finalDest.x == STARTING_ROW_P1);
+				(gameState.getCurrentPlayerID() == playerOneID && finalDest.x == STARTING_ROW_P2) ||
+				(gameState.getCurrentPlayerID() == playerTwoID && finalDest.x == STARTING_ROW_P1);
 		inCorner =
 				(finalDest.x == 0 || finalDest.x == SIZE - 1) &&
 				(finalDest.y == 0 || finalDest.y == SIZE - 1);
@@ -845,7 +839,7 @@ public final class GameBoard
 		Player currentPlayer, opponent;
 		int startingRow;
 		
-		if (currentState.getPlayer() == Player.ONE)
+		if (gameState.getCurrentPlayerID() == playerOneID)
 		{
 			currentPlayer = Player.ONE;
 			opponent = Player.TWO;
@@ -880,19 +874,19 @@ public final class GameBoard
 	 */
 	private void updateDestinationHistory(int pieceID, List<Point> dests)
 	{
-		if (this.currentState.getPlayer() == Player.ONE)
+		if (this.gameState.getCurrentPlayerID() == playerOneID)
 		{
-			twoDestAgoP1 = oneDestAgoP1;
-			twoIDAgoP1 = oneIDAgoP1;
-			oneDestAgoP1 = dests.get(dests.size() - 1);
-			oneIDAgoP1 = pieceID;
+			p1History.setTwoMoveAgo(p1History.getOneMoveAgo());
+			p1History.setTwoIDAgo(p1History.getOneIDAgo());
+			p1History.setOneMoveAgo(dests.get(dests.size() - 1));
+			p1History.setOneIDAgo(pieceID);
 		}
 		else /* Player TWO */
 		{
-			twoDestAgoP2 = oneDestAgoP2;
-			twoIDAgoP2 = oneIDAgoP2;
-			oneDestAgoP2 = dests.get(dests.size() - 1);
-			oneIDAgoP2 = pieceID;
+			p2History.setTwoMoveAgo(p2History.getOneMoveAgo());
+			p2History.setTwoIDAgo(p2History.getOneIDAgo());
+			p2History.setOneMoveAgo(dests.get(dests.size() - 1));
+			p2History.setOneIDAgo(pieceID);
 		}
 	}
 	
@@ -909,15 +903,15 @@ public final class GameBoard
 	{
 		Point destToTest;
 		int idToTest;
-		if (currentState.getPlayer() == Player.ONE)
+		if (gameState.getCurrentPlayerID() == playerOneID)
 		{
-			destToTest = twoDestAgoP1;
-			idToTest = twoIDAgoP1;
+			destToTest = p1History.getTwoMoveAgo();
+			idToTest = p1History.getTwoIDAgo();
 		}
 		else /* Player TWO */
 		{
-			destToTest = twoDestAgoP2;
-			idToTest = twoIDAgoP2;
+			destToTest = p2History.getTwoMoveAgo();
+			idToTest = p2History.getTwoIDAgo();
 		}
 		
 		if (destToTest != null && destToTest.equals(dests.get(dests.size()-1)) &&
@@ -938,8 +932,8 @@ public final class GameBoard
 		int id;
 		boolean showSymbol, showID;
 		
-		showSymbol = true;
-		showID = false;
+		showSymbol = false;
+		showID = true;
 		
 		for (int row = 0; row < SIZE; row++)
 		{

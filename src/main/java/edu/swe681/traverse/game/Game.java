@@ -1,4 +1,7 @@
-package edu.swe681.traverse.model;
+package edu.swe681.traverse.game;
+
+import edu.swe681.traverse.game.enums.GamePieceType;
+import edu.swe681.traverse.game.enums.Player;
 
 /**
  * (Might want to change this name?)

@@ -1,4 +1,4 @@
-package edu.swe681.traverse.model;
+package edu.swe681.traverse.game.enums;
 
 /**
  * Represents the type of a Traverse game piece

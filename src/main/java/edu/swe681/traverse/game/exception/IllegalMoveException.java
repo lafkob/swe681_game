@@ -1,4 +1,4 @@
-package edu.swe681.traverse.model;
+package edu.swe681.traverse.game.exception;
 
 import java.awt.Point;
 
@@ -7,7 +7,7 @@ import java.awt.Point;
  * the player's piece, move not legal for particular piece
  * type, etc)
  */
-public final class IllegalMoveException extends Exception
+public final class IllegalMoveException extends TraverseException
 {
 	/* Auto-generated ID */
 	private static final long serialVersionUID = 9220897921897691892L;
@@ -24,7 +24,6 @@ public final class IllegalMoveException extends Exception
 	
 	public IllegalMoveException(String message, Point start, Point dest)
 	{	
-		super(String.format("Move from [%d,%d] to [%d,%d] is illegal. ", start.x, start.y,
-				dest.x, dest.y) + message);
+		super(message, start, dest);
 	}
 }

@@ -1,24 +1,26 @@
-package edu.swe681.traverse.model;
+package edu.swe681.traverse.game;
+
+import edu.swe681.traverse.game.enums.GameStatus;
 
 /**
  * The Traverse Game state, indicating the current status
- * of the game and which player's turn it is.
+ * of the game and the ID of the player who's turn it is
  */
 public final class GameState
 {
 	private final GameStatus status;
-	private final Player player;
+	private final int currentPlayerID;
 	
 	/**
 	 * Default constructor 
 	 * 
 	 * @param status Game status
-	 * @param player Current player
+	 * @param playerID Current player's ID
 	 */
-	public GameState(GameStatus status, Player player)
+	public GameState(GameStatus status, int playerID)
 	{
 		this.status = status;
-		this.player = player;
+		this.currentPlayerID = playerID;
 	}
 	
 	/**
@@ -36,9 +38,9 @@ public final class GameState
 	 * 
 	 * @return The current player
 	 */
-	public Player getPlayer()
+	public int getCurrentPlayerID()
 	{
-		return player;
+		return currentPlayerID;
 	}
 	
 	/**
@@ -49,7 +51,7 @@ public final class GameState
 	 */
 	public GameState updateStatus(GameStatus status)
 	{
-		return new GameState(status, this.player);
+		return new GameState(status, this.currentPlayerID);
 	}
 	
 	/**
@@ -58,8 +60,8 @@ public final class GameState
 	 * @param player Next player
 	 * @return GameState updated with the given status
 	 */
-	public GameState updatePlayer(Player player)
+	public GameState updatePlayer(int currentPlayerID)
 	{
-		return new GameState(this.status, player);
+		return new GameState(this.status, currentPlayerID);
 	}
 }

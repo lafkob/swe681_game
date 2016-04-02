@@ -1,10 +1,12 @@
-package edu.swe681.traverse.model;
+package edu.swe681.traverse.game;
 import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.swe681.traverse.game.exception.*;
 
 /**
  * Temporary driver for debugging
@@ -17,14 +19,14 @@ public class Driver {
 		GameBoard board, newBoard;
 		String input;
 		
-		board = new GameBoard(false);
+		board = new GameBoard(10, 20, 30, true);
 		
 		try
 		{
 			br = new BufferedReader(new InputStreamReader(System.in));
 			
 			System.out.println(board);
-			System.out.println("What move, Player " + board.getCurrentState().getPlayer() + "?");
+			System.out.println("What move, Player " + board.getCurrentState().getCurrentPlayerID() + "?");
 			while(!((input=br.readLine()).equals("q")))
 			{
 				newBoard = null;
@@ -36,9 +38,9 @@ public class Driver {
 				{
 					System.out.println(ime.getMessage());
 				}
-				catch (InvalidMoveException ime)
+				catch (TraverseException te)
 				{
-					System.out.println(ime.getMessage());
+					System.out.println(te.getMessage());
 				}
 				
 				if (newBoard != null)
@@ -47,7 +49,7 @@ public class Driver {
 					System.out.println("\n" + board);
 				}
 				
-				System.out.println("What move, Player " + board.getCurrentState().getPlayer() + "?");
+				System.out.println("What move, Player " + board.getCurrentState().getCurrentPlayerID() + "?");
 			}
 			
 		}
@@ -58,30 +60,26 @@ public class Driver {
 	}
 	
 	private static GameBoard parseAndMakeMove(GameBoard board, String moveStr)
-			throws IllegalMoveException, InvalidMoveException
+			throws TraverseException
 		{
 			String[] tokens, subTokens;
 			int pieceID;
-			Point start;
 			List<Point> dests;
 			
 			tokens = moveStr.split(",");
 			
 			pieceID = Integer.parseInt(tokens[0]);
 			
-			subTokens = tokens[1].split(" ");
-			start = new Point(Integer.parseInt(subTokens[0]), Integer.parseInt(subTokens[1]));
-			
 			dests = new ArrayList<Point>();
-			if (tokens.length > 2)
+			if (tokens.length > 1)
 			{
-				subTokens = tokens[2].split(" ");
+				subTokens = tokens[1].split(" ");
 				for (int i = 0; i < subTokens.length; i=i+2)
 				{
 					dests.add(new Point(Integer.parseInt(subTokens[i]), Integer.parseInt(subTokens[i+1])));
 				}
 			}
 			
-			return board.movePiece(pieceID, start, dests);		
+			return board.movePiece(pieceID, dests);		
 		}
 }
