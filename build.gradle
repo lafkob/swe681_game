@@ -53,6 +53,7 @@ dependencies {
     sourceSets {
 	test {
 		java {
+			srcDirs = ["test/game"]
 		}
 	}
 }

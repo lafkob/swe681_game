@@ -560,7 +560,9 @@ public final class GameBoard
 	 * @param player A player
 	 * @return True if the given player has won, false otherwise
 	 */
+	public boolean playerHasWon(int playerID)
 	{
+		if (playerID == playerOneID)
 		{
 			for (int col = 1; col < SIZE-1; col++)
 			{
