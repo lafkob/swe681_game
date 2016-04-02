@@ -49,12 +49,13 @@ dependencies {
     testCompile 'junit:junit:4.12'
     
     testCompile 'org.springframework:spring-test:4.2.5.RELEASE'
-    
-    sourceSets {
+}
+
+sourceSets {
 	test {
 		java {
 			srcDirs = ["test/game"]
+			srcDirs = ["test"]
 		}
 	}
-}
 }
