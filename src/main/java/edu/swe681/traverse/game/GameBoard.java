@@ -94,17 +94,8 @@ public final class GameBoard
 	 */
 	protected GameBoard(GameBoard oldBoard)
 	{
-		int[][] newBoard;
-		
-		newBoard = new int[SIZE][SIZE];
-		for (int row = 0; row < SIZE; row++)
-		{
-			for (int col = 0; col < SIZE; col++)
-			{
-				newBoard[row][col] = oldBoard.board[row][col];
-			}
-		}
-		this.board = newBoard;
+		/* Note: Get board makes a copy and returns it */
+		this.board = oldBoard.getBoard();
 		
 		this.gameID = oldBoard.gameID;
 		this.playerOneID = oldBoard.playerOneID;
@@ -232,7 +223,7 @@ public final class GameBoard
 	 */
 	public Point getPieceLocation(int pieceID)
 	{
-		if (!(pieceID >= 0 || pieceID < Game.NUM_PIECES))
+		if (!(pieceID >= 0 && pieceID < Game.NUM_PIECES))
 		{
 			throw new IllegalArgumentException("PieceID must be between 1 and 15.");
 		}
@@ -247,6 +238,40 @@ public final class GameBoard
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Returns the board state
+	 * 
+	 * @return The board state
+	 */
+	public int[][] getBoard()
+	{
+		int[][] retBoard = new int[SIZE][SIZE];
+		
+		for (int i = 0; i < SIZE; i++)
+		{
+			for (int j = 0; j < SIZE; j++)
+			{
+				retBoard[i][j] = board[i][j];
+			}
+		}
+		
+		return retBoard;
+	}
+	
+	/**
+	 * Returns the move history for the given player
+	 * 
+	 * @param playerID Player from which to retrieve history
+	 * @return The move history of the given player
+	 */
+	public MoveHistory getMoveHistory(int playerID)
+	{
+		if (playerID == playerOneID)
+			return p1History;
+		else
+			return p2History;
 	}
 	
 	/**
@@ -296,12 +321,11 @@ public final class GameBoard
 		
 		newBoard = new GameBoard(this);
 		start = getPieceLocation(pieceID);
+		newBoard.jumpMade = false;
 		
 		/* Make sure the initial conditions valid before evaluating
 		 * the individual moves. */
 		newBoard.validateGeneralConditions(pieceID, start, dests);
-		
-		newBoard.jumpMade = false;
 		
 		/* Increments through the destinations and validates each one */
 		for (int moveNum = 0; moveNum < dests.size(); moveNum++)
