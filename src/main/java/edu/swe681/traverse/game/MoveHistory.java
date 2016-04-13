@@ -4,7 +4,6 @@ import java.awt.Point;
 
 /**
  * An immutable record of the last two Traverse moves.
- *
  */
 public final class MoveHistory
 {

@@ -50,6 +50,12 @@ public class GameBoardTests
 		assertEquals("Get player two ID", playerTwoID, board.getPlayerTwoID());
 	}
 	
+	@Test (expected=IllegalArgumentException.class)
+	public void GetInvalidPieceTest()
+	{
+		board.getPieceLocation(-1);
+	}
+	
 	@Test
 	public void ShuffleTest()
 	{
