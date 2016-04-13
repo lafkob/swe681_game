@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.swe681.traverse.game.GameBoard;
+import edu.swe681.traverse.game.enums.GameStatus;
 import edu.swe681.traverse.game.exception.*;
 
 /**
@@ -29,7 +30,9 @@ public class GameBoardTests
 	@Before
 	public void setUp()
     {
-		board = new GameBoard(gameID, playerOneID, playerTwoID, false);
+		board = new GameBoard(gameID, false);
+		board = board.registerPlayer(playerOneID);
+		board = board.registerPlayer(playerTwoID);
 		genericMoveNum = 0;
 	}
 
@@ -39,6 +42,54 @@ public class GameBoardTests
 		board = null;
 	}
 	
+	@Test
+	public void GetterTest()
+	{
+		assertEquals("Get game ID", gameID, board.getGameID());
+		assertEquals("Get player one ID", playerOneID, board.getPlayerOneID());
+		assertEquals("Get player two ID", playerTwoID, board.getPlayerTwoID());
+	}
+	
+	@Test
+	public void ShuffleTest()
+	{
+		/* Primarily this is just to make sure shuffle runs without breaking. Hard to 
+		 * make a hard test for randomization...*/
+		board = new GameBoard(gameID, true);
+	}
+	
+	@Test
+	public void LegalRegisterPlayerTest()
+	{
+		board = new GameBoard(gameID, false);
+		board = board.registerPlayer(playerOneID);
+		assertEquals(board.getGameState().getStatus(), GameStatus.WAITING_FOR_PLAYERS);
+		assertEquals(board.getGameState().getCurrentPlayerID(), -1);
+		board = board.registerPlayer(playerTwoID);
+		assertEquals(board.getGameState().getStatus(), GameStatus.PLAY);
+		assertEquals(board.getGameState().getCurrentPlayerID(), playerOneID);
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void IllegalRegisterPlayerTest()
+	{
+		board.registerPlayer(5);
+	}
+	
+	@Test (expected=IllegalStateException.class)
+	public void MoveBeforeGameStartTest() throws TraverseException
+	{
+		board = new GameBoard(gameID, false);
+		board = board.registerPlayer(playerOneID);
+		board = parseAndMakeMove(board, "0,1 0");
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void NegativeRegisterPlayerTest()
+	{
+		board.registerPlayer(-1);
+	}
+		
 	@Test (expected=InvalidInputException.class)
 	public void InvalidPieceSelectedTest() throws TraverseException
 	{
@@ -471,12 +522,12 @@ public class GameBoardTests
 		board = parseAndMakeMove(board, "0,1 1");
 	}
 	
-	@Test
+	@Test (expected=IllegalStateException.class)
 	public void PlayerHasWonTest() throws TraverseException
 	{
 		boardSetup = parseGameBoardString(
-				  "=  8  9 10 11 12 13 14 15 =\n"
-			    + "=  -  -  -  -  -  -  -  - =\n"
+				  "=  8  9 10 11  - 13 14 15 =\n"
+			    + "=  -  -  -  - 12  -  -  - =\n"
 			    + "=  -  -  -  -  -  -  -  - =\n"
 			    + "=  -  -  -  -  -  -  -  - =\n"
 			    + "=  -  -  -  -  -  -  -  - =\n"
@@ -488,11 +539,17 @@ public class GameBoardTests
 
 		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
 		
-		assertTrue(!board.playerHasWon(playerOneID));
-		assertTrue(board.playerHasWon(playerTwoID));
-		
+		assertTrue("Player one should not have won yet.", !board.playerHasWon(playerOneID));
+		assertTrue("Player two should not have won yet.", !board.playerHasWon(playerTwoID));
+
 		board = parseAndMakeMove(board, "1,9 2");
-		assertTrue(board.playerHasWon(playerOneID));
+		assertTrue("Player one should have won.", board.playerHasWon(playerOneID));
+		assertEquals("Player ID should match player one's ID.", 
+				board.getGameState().getCurrentPlayerID(), playerOneID);
+		assertEquals("The Game state should have switched to WIN", GameStatus.WIN,
+				board.getGameState().getStatus());
+		
+		board = parseAndMakeMove(board, "12,0 5");
 	}
 	
 	private GameBoard parseAndMakeMove(GameBoard board, String moveStr)
@@ -558,7 +615,7 @@ public class GameBoardTests
 	{
 		GameBoard newBoard;
 		
-		if (board.getCurrentState().getCurrentPlayerID() == board.getPlayerOneID())
+		if (board.getGameState().getCurrentPlayerID() == board.getPlayerOneID())
 		{
 			newBoard = parseAndMakeMove(board, String.format("0,%d 1", genericMoveNum+1));
 			genericMoveNum++;

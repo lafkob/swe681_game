@@ -48,7 +48,7 @@ public final class GameBoard
 	 * @param shuffle Shuffles the starting locations if true,
 	 * 	does not otherwise
 	 */
-	public GameBoard(int gameID, int playerOneID, int playerTwoID, boolean shuffle)
+	public GameBoard(int gameID, boolean shuffle)
 	{
 		board = new int[SIZE][SIZE];
 		for (int row = 0; row < SIZE; row++)
@@ -77,10 +77,10 @@ public final class GameBoard
 		if (shuffle)
 			shuffleStartingPos();
 		
-		this.playerOneID = playerOneID;
-		this.playerTwoID = playerTwoID;
+		this.playerOneID = -1;
+		this.playerTwoID = -1;
 		
-		this.gameState = new GameState(GameStatus.PLAY, playerOneID);
+		this.gameState = new GameState(GameStatus.WAITING_FOR_PLAYERS, -1);
 		this.gameID = gameID;
 		
 		this.p1History = new MoveHistory(null, -1, null, -1);
@@ -111,8 +111,8 @@ public final class GameBoard
 		this.playerTwoID = oldBoard.playerTwoID;
 		
 		this.gameState = new GameState(
-				oldBoard.getCurrentState().getStatus(),
-				oldBoard.getCurrentState().getCurrentPlayerID());
+				oldBoard.gameState.getStatus(),
+				oldBoard.gameState.getCurrentPlayerID());
 				
 		this.jumpMade = oldBoard.jumpMade;
 		
@@ -134,9 +134,13 @@ public final class GameBoard
 	 * @param gameID GameID for the board
 	 * @param board The game board layout
 	 */
-	public GameBoard(int gameID, int playerOneId, int playerTwoID, int[][] board)
+	public GameBoard(int gameID, int playerOneID, int playerTwoID, int[][] board)
 	{
-		this(gameID, playerOneId, playerTwoID, false);
+		this(gameID, false);
+		
+		this.playerOneID = playerOneID;
+		this.playerTwoID = playerTwoID;
+		this.gameState = new GameState(GameStatus.PLAY, playerOneID);
 		
 		for (int row = 0; row < SIZE; row++)
 		{
@@ -148,14 +152,45 @@ public final class GameBoard
 	}
 	
 	/**
+	 * Returns a board with the given player registered.
+	 * 
+	 * @param playerID ID of player to register
+	 * @return Board with the player registered
+	 * @throws IllegalStateException If all players are already registered
+	 * @throws IllegalArgumentException If player ID is less than 0
+	 */
+	public GameBoard registerPlayer(int playerID)
+	{
+		GameBoard newBoard = new GameBoard(this);
+		
+		if (playerID < 0)
+		{
+			throw new IllegalArgumentException("PlayerID must be positive.");
+		}
+		
+		if (playerOneID >= 0)
+		{
+			if (playerTwoID >= 0)
+				throw new IllegalStateException("Players are already registered.");
+			
+			newBoard.playerTwoID = playerID;
+			newBoard.gameState = gameState.updateStatus(GameStatus.PLAY).updatePlayer(playerOneID);
+		}
+		else
+		{
+			newBoard.playerOneID = playerID;
+		}
+		
+		return newBoard;
+	}
+	
+	/**
 	 * Returns the current game state
 	 * 
 	 * @return The current game state
 	 */
-	public GameState getCurrentState()
+	public GameState getGameState()
 	{
-		/* Note: GameStates are immutable, so returning this as is
-		 * shouldn't be an issue. */
 		return this.gameState;
 	}
 	
@@ -246,6 +281,12 @@ public final class GameBoard
 		Point midway, dest;
 		Point start;
 		
+		if (gameState.getStatus() == GameStatus.WAITING_FOR_PLAYERS)
+			throw new IllegalStateException("Cannot make move while waiting for players.");
+		if (gameState.getStatus() == GameStatus.WIN)
+			throw new IllegalStateException(String.format("Cannot make move. Player %d has won.",
+					gameState.getCurrentPlayerID()));
+		
 		/* The piece must be between 0 and NUM_PIECES(16).*/
 		if (!(pieceID >= 0 && pieceID < Game.NUM_PIECES))
 		{
@@ -280,12 +321,11 @@ public final class GameBoard
 			 * their starting locations. */
 			if (gameState.getStatus()== GameStatus.START)
 			{
-				newBoard.validateStartMove(start, dest);
-				
 				throw new UnsupportedOperationException("Arranging pieces at the start is not"
 						+ "currently implemented.");
 				/*
 				int temp = newBoard.board[dest.x][dest.y];
+				newBoard.validateStartMove(start, dest);
 				newBoard.board[dest.x][dest.y] = newBoard.board[midway.x][midway.y];
 				newBoard.board[midway.x][midway.y] = temp;
 				*/
@@ -307,7 +347,14 @@ public final class GameBoard
 			}
 		}
 		
-		newBoard.advanceTurn();
+		if (newBoard.playerHasWon(newBoard.gameState.getCurrentPlayerID()))
+		{
+			newBoard.gameState = newBoard.gameState.updateStatus(GameStatus.WIN);
+		}
+		else
+		{
+			newBoard.advanceTurn();
+		}
 		
 		return newBoard;
 	}
@@ -385,16 +432,17 @@ public final class GameBoard
 	 * 
 	 * @throws TraverseException If the move is illegal
 	 */
+	/*
 	private void validateStartMove(Point start, Point dest)
 		throws TraverseException
 	{
 		int row;
 		
-		/* If we're just stating out, pieces can be swapped with each other,
-		 * but only within their row */
+		// If we're just stating out, pieces can be swapped with each other,
+		// but only within their row
 		if (gameState.getCurrentPlayerID() == playerOneID)
 			row = 0;
-		else /* Player two */
+		else // Player two
 			row = SIZE - 1;
 		
 		if (start.x != row || dest.x != row)
@@ -403,6 +451,7 @@ public final class GameBoard
 					+ "starting line.");
 		}
 	}
+	*/
 	
 	/**
 	 * Precondition: This must be called after validatePieceAndStart and during
@@ -421,17 +470,7 @@ public final class GameBoard
 		GamePiece piece;
 		int playerSign;
 		
-		/* Destination or start is out of bounds.
-		 * Note: Given that the start is the last destination and has already been checked,
-		 * based on how this is used, we could probably make it a precondition that start
-		 * is in bounds, since it's a private class. That is - this should be unreachable,
-		 * but could serve as a sanity check. */
-		if (!(start.x >= 0 && start.x < SIZE &&
-			  start.y >= 0 && start.y < SIZE))
-		{
-			throw new InvalidInputException(String.format("The location [%d,%d] is not "
-					+ "on the board.", start.x, start.y), start, dest);
-		}
+		/* Destination is out of bounds. */
 		if (!(dest.x >= 0 && dest.x < SIZE &&
 			  dest.y >= 0 && dest.y < SIZE))
 		{
@@ -878,17 +917,13 @@ public final class GameBoard
 	{
 		if (this.gameState.getCurrentPlayerID() == playerOneID)
 		{
-			p1History.setTwoMoveAgo(p1History.getOneMoveAgo());
-			p1History.setTwoIDAgo(p1History.getOneIDAgo());
-			p1History.setOneMoveAgo(dests.get(dests.size() - 1));
-			p1History.setOneIDAgo(pieceID);
+			p1History = p1History.updateHistoryTwo(p1History.getOneMoveAgo(), p1History.getOneIDAgo());
+			p1History = p1History.updateHistoryOne(dests.get(dests.size() - 1), pieceID);
 		}
 		else /* Player TWO */
 		{
-			p2History.setTwoMoveAgo(p2History.getOneMoveAgo());
-			p2History.setTwoIDAgo(p2History.getOneIDAgo());
-			p2History.setOneMoveAgo(dests.get(dests.size() - 1));
-			p2History.setOneIDAgo(pieceID);
+			p2History = p2History.updateHistoryTwo(p2History.getOneMoveAgo(), p2History.getOneIDAgo());
+			p2History = p2History.updateHistoryOne(dests.get(dests.size() - 1), pieceID);
 		}
 	}
 	

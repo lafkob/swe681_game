@@ -19,14 +19,16 @@ public class Driver {
 		GameBoard board, newBoard;
 		String input;
 		
-		board = new GameBoard(10, 20, 30, true);
+		board = new GameBoard(10, true);
+		board.registerPlayer(20);
+		board.registerPlayer(30);
 		
 		try
 		{
 			br = new BufferedReader(new InputStreamReader(System.in));
 			
 			System.out.println(board);
-			System.out.println("What move, Player " + board.getCurrentState().getCurrentPlayerID() + "?");
+			System.out.println("What move, Player " + board.getGameState().getCurrentPlayerID() + "?");
 			while(!((input=br.readLine()).equals("q")))
 			{
 				newBoard = null;
@@ -49,7 +51,7 @@ public class Driver {
 					System.out.println("\n" + board);
 				}
 				
-				System.out.println("What move, Player " + board.getCurrentState().getCurrentPlayerID() + "?");
+				System.out.println("What move, Player " + board.getGameState().getCurrentPlayerID() + "?");
 			}
 			
 		}

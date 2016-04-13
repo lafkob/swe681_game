@@ -2,6 +2,10 @@ package edu.swe681.traverse.game;
 
 import java.awt.Point;
 
+/**
+ * An immutable record of the last two Traverse moves.
+ *
+ */
 public final class MoveHistory
 {
 	private Point oneMoveAgo;
@@ -11,41 +15,52 @@ public final class MoveHistory
 
 	public MoveHistory(Point oneMoveAgo, int oneIDAgo, Point twoMoveAgo, int twoIDAgo)
 	{
-		this.oneMoveAgo = oneMoveAgo;
+		if (oneMoveAgo != null)
+			this.oneMoveAgo = new Point(oneMoveAgo.x, oneMoveAgo.y);
+		else
+			this.oneMoveAgo = oneMoveAgo;
 		this.oneIDAgo = oneIDAgo;
-		this.twoMoveAgo = twoMoveAgo;
+		
+		if (twoMoveAgo != null)
+			this.twoMoveAgo = new Point(twoMoveAgo.x, twoMoveAgo.y);
+		else
+			this.twoMoveAgo = twoMoveAgo;
 		this.twoIDAgo = twoIDAgo;
 	}
 
-	public Point getOneMoveAgo() {
-		return oneMoveAgo;
+	public Point getOneMoveAgo()
+	{
+		if (oneMoveAgo == null)
+			return null;
+		else
+			return new Point(oneMoveAgo.x, oneMoveAgo.y);
 	}
 
-	public Point getTwoMoveAgo() {
-		return twoMoveAgo;
+	public Point getTwoMoveAgo()
+	{
+		if (twoMoveAgo == null)
+			return null;
+		else
+			return new Point(twoMoveAgo.x, twoMoveAgo.y);
 	}
 
-	public int getOneIDAgo() {
+	public int getOneIDAgo()
+	{
 		return oneIDAgo;
 	}
 
-	public int getTwoIDAgo() {
+	public int getTwoIDAgo()
+	{
 		return twoIDAgo;
 	}
 	
-	public void setOneMoveAgo(Point oneMoveAgo) {
-		this.oneMoveAgo = oneMoveAgo;
+	public MoveHistory updateHistoryOne(Point oneMoveAgo, int oneIDAgo)
+	{
+		return new MoveHistory(oneMoveAgo, oneIDAgo, this.twoMoveAgo, this.twoIDAgo);
 	}
-
-	public void setTwoMoveAgo(Point twoMoveAgo) {
-		this.twoMoveAgo = twoMoveAgo;
-	}
-
-	public void setOneIDAgo(int oneIDAgo) {
-		this.oneIDAgo = oneIDAgo;
-	}
-
-	public void setTwoIDAgo(int twoIDAgo) {
-		this.twoIDAgo = twoIDAgo;
+	
+	public MoveHistory updateHistoryTwo(Point twoMoveAgo, int twoIDAgo)
+	{
+		return new MoveHistory(this.oneMoveAgo, this.oneIDAgo, twoMoveAgo, twoIDAgo);
 	}
 }
