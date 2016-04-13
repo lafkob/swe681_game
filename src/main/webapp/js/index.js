@@ -94,7 +94,12 @@ $(function() {
 
 utils = {
 	requestErrorHandler: function(jqXHR, textStatus, errorThrown){
-		$("div#reqResult").html("<b>Error</b><br/>" + textStatus + "<br/>" + errorThrown);
+		var output = "<b>Request Error</b><br/>";
+		output += jqXHR.status + ": " + errorThrown + "<br/>";
+		if(jqXHR.responseJSON) output += JSON.stringify(jqXHR.responseJSON);
+		// do not show responseText in case html is returned
+		
+		$("div#reqResult").html(output);
 	},
 	
 	jsonSuccessHandler: function(data, status, jqXHR){
