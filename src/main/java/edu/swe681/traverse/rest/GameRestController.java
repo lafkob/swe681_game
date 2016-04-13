@@ -2,6 +2,8 @@ package edu.swe681.traverse.rest;
 
 import java.util.Random;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,7 +51,7 @@ public class GameRestController {
 	 */
 	@RequestMapping(value="/quit", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<String> quitGame(@RequestBody GameRequestDto dto) {
+	public ResponseEntity<String> quitGame(@Valid @RequestBody GameRequestDto dto) {
 		// TODO: get the user and make sure they are in the game they requested to leave
 		// TODO: update the game state:
 		// if in progress other user wins
@@ -64,7 +66,7 @@ public class GameRestController {
 	// TODO: document
 	@RequestMapping(value="/join", method = RequestMethod.POST)
 	@ResponseBody
-	public GameStatusResponseDto joinGame(@RequestBody JoinRequestDto joinRequest) {
+	public GameStatusResponseDto joinGame(@Valid @RequestBody JoinRequestDto joinRequest) {
 		// TODO: get the user and make sure they are not already in a game
 		// TODO: update the game state to show this user in it
 		// TODO: auditing stuff
@@ -76,7 +78,7 @@ public class GameRestController {
 	// TODO: document
 	@RequestMapping(value="/status", method = RequestMethod.POST)
 	@ResponseBody
-	public GameStatusResponseDto getStatus(@RequestBody StatusRequestDto statusRequest) {
+	public GameStatusResponseDto getStatus(@Valid @RequestBody StatusRequestDto statusRequest) {
 		// TODO: get the user and make sure they are in the game being requested
 		// TODO: get the game state and populate it fully
 		// TODO: audit the call?
@@ -87,7 +89,7 @@ public class GameRestController {
 	// TODO: document
 	@RequestMapping(value="/move", method = RequestMethod.POST)
 	@ResponseBody
-	public GameStatusResponseDto makeMove(@RequestBody MoveRequestDto moveRequest) {
+	public GameStatusResponseDto makeMove(@Valid @RequestBody MoveRequestDto moveRequest) {
 		// TODO: get the user and make sure they are in the game for the move
 		// TODO: update the game state, exceptions will be thrown and handled globally
 		// TODO: audit the call

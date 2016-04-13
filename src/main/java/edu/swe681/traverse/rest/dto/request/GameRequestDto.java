@@ -1,9 +1,13 @@
 package edu.swe681.traverse.rest.dto.request;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Superclass for all game-centric requests. Gives functionality for gameId
  */
 public class GameRequestDto {
+	
+	@NotNull
 	private Long gameId;
 	
 	public GameRequestDto(){}
