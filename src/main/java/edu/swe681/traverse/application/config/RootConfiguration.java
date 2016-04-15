@@ -20,8 +20,10 @@ public class RootConfiguration {
 	
 	private final static String JNDI_DATASOURCE = "java:comp/env/jdbc/traverse";
 
+	// This serves to create a datasource bean managed by spring that we can use anywhere
+	// default scope is singleton, so there should be only one instance ever
 	@Bean
-	public DataSource datasource() throws SQLException {
+	public DataSource dataSource() throws SQLException {
 		DataSource dataSource = null;
         JndiTemplate jndi = new JndiTemplate();
         try {
