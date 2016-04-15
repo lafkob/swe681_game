@@ -1,4 +1,4 @@
-package edu.swe681.traverse.config;
+package edu.swe681.traverse.application.config;
 
 import java.util.List;
 

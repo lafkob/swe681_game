@@ -5,8 +5,8 @@ import javax.servlet.Filter;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
-import edu.swe681.traverse.config.RootConfiguration;
-import edu.swe681.traverse.config.WebMvcConfiguration;
+import edu.swe681.traverse.application.config.RootConfiguration;
+import edu.swe681.traverse.application.config.WebMvcConfiguration;
 
 public class ApplicationInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 	@Override
