@@ -8,6 +8,13 @@ The .gitignore file has a few directories in it that gradle will automatically g
 
 Once we set up an eclipse project I would also think we want to keep the eclipse specific project file and settings directory out of source control, so we can each control our project settings locally (or even not have to use eclipse).
 
+## Tomcat setup
+Replace the context.xml in the tomcat config directory with the one provided under /config. You'll also need to put the password for your database in there.
+
+Place the mysql connector jar from /config into the tomcat lib directory.
+
+Create a /certs directory in the tomcat installation and put jks file from /config in there. You'll need to configure a connector in server.xml to utilize SSL with this cert.
+
 ## Gradle Stuff
 installation - just download the binary-only version from their site, unzip it, set the unzipped location \bin in your path environment variable (so your command line picks it up)
 
