@@ -1,6 +1,5 @@
 package edu.swe681.traverse.application.config;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.naming.NamingException;
