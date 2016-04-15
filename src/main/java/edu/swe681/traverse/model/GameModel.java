@@ -72,6 +72,10 @@ public class GameModel {
 		this.p2TwoIdAgo = board.getMoveHistory(board.getPlayerTwoID()).getTwoIDAgo();
 	}
 	
+	public int[][] boardAsArray() throws JsonParseException, JsonMappingException, IOException {
+		return deserialize2dIntArray(this.board);
+	}
+	
 	private String serialize2dIntArray(int[][] arr) throws JsonProcessingException{
 		return new ObjectMapper().writeValueAsString(arr);
 	}
