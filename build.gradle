@@ -48,4 +48,3 @@ dependencies {
     
     testCompile 'org.springframework:spring-test:4.2.5.RELEASE'
 }
-d
