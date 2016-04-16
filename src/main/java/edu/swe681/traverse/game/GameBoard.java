@@ -1,11 +1,16 @@
 package edu.swe681.traverse.game;
 import java.awt.Point;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 import edu.swe681.traverse.game.enums.*;
 import edu.swe681.traverse.game.exception.*;
+import edu.swe681.traverse.model.GameModel;
 
 /**
  * An immutable Traverse game board
@@ -32,8 +37,8 @@ public final class GameBoard
 	
 	private int board[][];
 	private GameState gameState;
-	private int gameID;
-	private int playerOneID, playerTwoID;
+	private long gameID;
+	private Long playerOneID, playerTwoID;
 	
 	private MoveHistory p1History;
 	private MoveHistory p2History;
@@ -48,9 +53,19 @@ public final class GameBoard
 	 * @param shuffle Shuffles the starting locations if true,
 	 * 	does not otherwise
 	 */
-	public GameBoard(int gameID, boolean shuffle)
+	public GameBoard(long gameID, Long playerOneID, boolean shuffle)
 	{
-		board = new int[SIZE][SIZE];
+		this(
+			gameID,
+			playerOneID,
+			null,
+			null, 
+			new GameState(GameStatus.WAITING_FOR_PLAYER_TWO, null),
+			new MoveHistory(),
+			new MoveHistory()
+		);
+		
+		this.board = new int[SIZE][SIZE];
 		for (int row = 0; row < SIZE; row++)
 		{
 			for (int col = 0; col < SIZE; col++)
@@ -75,16 +90,7 @@ public final class GameBoard
 		
 		/* Shuffle the starting positions for players 1 and 2 */
 		if (shuffle)
-			shuffleStartingPos();
-		
-		this.playerOneID = -1;
-		this.playerTwoID = -1;
-		
-		this.gameState = new GameState(GameStatus.WAITING_FOR_PLAYERS, -1);
-		this.gameID = gameID;
-		
-		this.p1History = new MoveHistory(null, -1, null, -1);
-		this.p2History = new MoveHistory(null, -1, null, -1);
+			shuffleStartingPos();		
 	}
 	
 	/**
@@ -94,52 +100,81 @@ public final class GameBoard
 	 */
 	protected GameBoard(GameBoard oldBoard)
 	{
-		/* Note: Get board makes a copy and returns it */
-		this.board = oldBoard.getBoard();
-		
-		this.gameID = oldBoard.gameID;
-		this.playerOneID = oldBoard.playerOneID;
-		this.playerTwoID = oldBoard.playerTwoID;
-		
-		this.gameState = new GameState(
-				oldBoard.gameState.getStatus(),
-				oldBoard.gameState.getCurrentPlayerID());
-				
+		this(
+			oldBoard.gameID,
+			oldBoard.playerOneID,
+			oldBoard.playerTwoID,
+			oldBoard.getBoard(),
+			new GameState(oldBoard.gameState.getStatus(),
+				oldBoard.gameState.getCurrentPlayerID()),
+			new MoveHistory(oldBoard.p1History.getOneMoveAgo(),
+					oldBoard.p1History.getOneIDAgo(),
+					oldBoard.p1History.getTwoMoveAgo(),
+					oldBoard.p1History.getTwoIDAgo()),
+			new MoveHistory(oldBoard.p2History.getOneMoveAgo(),
+					oldBoard.p2History.getOneIDAgo(),
+					oldBoard.p2History.getTwoMoveAgo(),
+					oldBoard.p2History.getTwoIDAgo())
+		);
+
 		this.jumpMade = oldBoard.jumpMade;
-		
-		this.p1History = new MoveHistory(oldBoard.p1History.getOneMoveAgo(),
-				oldBoard.p1History.getOneIDAgo(),
-				oldBoard.p1History.getTwoMoveAgo(),
-				oldBoard.p1History.getTwoIDAgo());
-		
-		this.p2History = new MoveHistory(oldBoard.p2History.getOneMoveAgo(),
-				oldBoard.p2History.getOneIDAgo(),
-				oldBoard.p2History.getTwoMoveAgo(),
-				oldBoard.p2History.getTwoIDAgo());
 	}
 	
 	/**
-	 * Requires: Board must be a valid Traverse board
+	 * Requires: IDs must not be negative, no values can be null, except board,
+	 * but only if you plan to add a new board immediately
+	 * TODO: I really want to make this private, but it makes testing odd
 	 * Constructor creates a new GameBoard with the given board
 	 * 
 	 * @param gameID GameID for the board
 	 * @param board The game board layout
 	 */
-	public GameBoard(int gameID, int playerOneID, int playerTwoID, int[][] board)
-	{
-		this(gameID, false);
-		
+	public GameBoard(long gameID, Long playerOneID, Long playerTwoID, int[][] board,
+			GameState gameState, MoveHistory p1History, MoveHistory p2History)
+	{		
+		this.board = board;
+		this.gameID = gameID;
 		this.playerOneID = playerOneID;
 		this.playerTwoID = playerTwoID;
-		this.gameState = new GameState(GameStatus.PLAY, playerOneID);
+		this.gameState = gameState;
+		this.p1History = p1History;
+		this.p2History = p2History;
 		
-		for (int row = 0; row < SIZE; row++)
+		this.jumpMade = false;
+		
+		if (board != null)
 		{
-			for (int col = 0; col < SIZE; col++)
+			for (int row = 0; row < SIZE; row++)
 			{
-				this.board[row][col] = board[row][col];
+				for (int col = 0; col < SIZE; col++)
+				{
+					this.board[row][col] = board[row][col];
+				}
 			}
 		}
+		else
+			this.board = board;
+	}
+	
+	public GameBoard(GameModel model) throws JsonParseException, JsonMappingException, IOException
+	{
+		this(
+			model.getGameId(),
+			model.getPlayerOneId(),
+			model.getPlayerTwoId(),
+			model.boardAsArray(),
+			new GameState(model.getGameStatus(), model.getCurrentPlayerId()),
+			new MoveHistory(
+				new Point(model.getP1OneMoveAgoX(), model.getP1OneMoveAgoY()),
+				model.getP1OneIdAgo(),
+				new Point(model.getP1TwoMoveAgoX(), model.getP1TwoMoveAgoY()),
+				model.getP1TwoIdAgo()),
+			new MoveHistory(
+					new Point(model.getP1OneMoveAgoX(), model.getP1OneMoveAgoY()),
+					model.getP1OneIdAgo(),
+					new Point(model.getP1TwoMoveAgoX(), model.getP1TwoMoveAgoY()),
+					model.getP1TwoIdAgo())
+		);
 	}
 	
 	/**
@@ -150,27 +185,20 @@ public final class GameBoard
 	 * @throws IllegalStateException If all players are already registered
 	 * @throws IllegalArgumentException If player ID is less than 0
 	 */
-	public GameBoard registerPlayer(int playerID)
+	public GameBoard registerPlayerTwo(Long playerID)
 	{
 		GameBoard newBoard = new GameBoard(this);
 		
-		if (playerID < 0)
+		if (playerID == null || playerID < 0)
 		{
 			throw new IllegalArgumentException("PlayerID must be positive.");
 		}
 		
-		if (playerOneID >= 0)
-		{
-			if (playerTwoID >= 0)
-				throw new IllegalStateException("Players are already registered.");
-			
-			newBoard.playerTwoID = playerID;
-			newBoard.gameState = gameState.updateStatus(GameStatus.PLAY).updatePlayer(playerOneID);
-		}
-		else
-		{
-			newBoard.playerOneID = playerID;
-		}
+		if (this.playerTwoID != null)
+			throw new IllegalStateException("Both players are already registered.");
+		
+		newBoard.playerTwoID = playerID;
+		newBoard.gameState = gameState.updateStatus(GameStatus.PLAY).updatePlayer(playerOneID);
 		
 		return newBoard;
 	}
@@ -190,7 +218,7 @@ public final class GameBoard
 	 * 
 	 * @return The game ID
 	 */
-	public int getGameID()
+	public long getGameID()
 	{
 		return this.gameID;
 	}
@@ -200,7 +228,7 @@ public final class GameBoard
 	 * 
 	 * @return Player one's ID
 	 */
-	public int getPlayerOneID()
+	public Long getPlayerOneID()
 	{
 		return this.playerOneID;
 	}
@@ -210,7 +238,7 @@ public final class GameBoard
 	 * 
 	 * @return Player two's ID
 	 */
-	public int getPlayerTwoID()
+	public Long getPlayerTwoID()
 	{
 		return this.playerTwoID;
 	}
@@ -266,7 +294,7 @@ public final class GameBoard
 	 * @param playerID Player from which to retrieve history
 	 * @return The move history of the given player
 	 */
-	public MoveHistory getMoveHistory(int playerID)
+	public MoveHistory getMoveHistory(Long playerID)
 	{
 		if (playerID == playerOneID)
 			return p1History;
@@ -306,7 +334,7 @@ public final class GameBoard
 		Point midway, dest;
 		Point start;
 		
-		if (gameState.getStatus() == GameStatus.WAITING_FOR_PLAYERS)
+		if (gameState.getStatus() == GameStatus.WAITING_FOR_PLAYER_TWO)
 			throw new IllegalStateException("Cannot make move while waiting for players.");
 		if (gameState.getStatus() == GameStatus.WIN)
 			throw new IllegalStateException(String.format("Cannot make move. Player %d has won.",
@@ -339,36 +367,21 @@ public final class GameBoard
 				midway = start;
 			else
 				midway = dests.get(moveNum - 1);
+
+
+			/* Every move after the first move must have followed a jump move */
+			if (moveNum > 0 && !newBoard.jumpMade)
+			{
+				throw new IllegalMultiMoveException("", midway, dest);
+			}
 			
-			/* Currently, we will start in the play stage and randomize the
-			 * starting pieces. In the future, we may allow players to rearrange
-			 * their starting locations. */
-			if (gameState.getStatus()== GameStatus.START)
-			{
-				throw new UnsupportedOperationException("Arranging pieces at the start is not"
-						+ "currently implemented.");
-				/*
-				int temp = newBoard.board[dest.x][dest.y];
-				newBoard.validateStartMove(start, dest);
-				newBoard.board[dest.x][dest.y] = newBoard.board[midway.x][midway.y];
-				newBoard.board[midway.x][midway.y] = temp;
-				*/
-			}
-			if (gameState.getStatus()== GameStatus.PLAY)
-			{
-				/* Every move after the first move must have followed a jump move */
-				if (moveNum > 0 && !newBoard.jumpMade)
-				{
-					throw new IllegalMultiMoveException("", midway, dest);
-				}
-				
-				newBoard.validatePlayMove(pieceID, midway, dest);
-				
-				newBoard.board[dest.x][dest.y] = newBoard.board[midway.x][midway.y];
-				newBoard.board[midway.x][midway.y] = EMPTY;
-				
-				newBoard.updateDestinationHistory(pieceID, dests);
-			}
+			newBoard.validatePlayMove(pieceID, midway, dest);
+			
+			newBoard.board[dest.x][dest.y] = newBoard.board[midway.x][midway.y];
+			newBoard.board[midway.x][midway.y] = EMPTY;
+			
+			newBoard.updateDestinationHistory(pieceID, dests);
+
 		}
 		
 		if (newBoard.playerHasWon(newBoard.gameState.getCurrentPlayerID()))
@@ -445,37 +458,6 @@ public final class GameBoard
 					+ "backtrack", pieceID, dests.get(dests.size()-1).x, dests.get(dests.size()-1).y));
 		}
 	}
-	
-	/**
-	 * Precondition: Must be called after validatePieceAndStart and during
-	 * the starting phase.
-	 * Validates the given move taken during the staring phase.
-	 * 
-	 * @param start Piece's starting location
-	 * @param dest Location to which the piece is moving
-	 * 
-	 * @throws TraverseException If the move is illegal
-	 */
-	/*
-	private void validateStartMove(Point start, Point dest)
-		throws TraverseException
-	{
-		int row;
-		
-		// If we're just stating out, pieces can be swapped with each other,
-		// but only within their row
-		if (gameState.getCurrentPlayerID() == playerOneID)
-			row = 0;
-		else // Player two
-			row = SIZE - 1;
-		
-		if (start.x != row || dest.x != row)
-		{
-			throw new IllegalStartingMoveException("Illegal move. You may only move within your "
-					+ "starting line.");
-		}
-	}
-	*/
 	
 	/**
 	 * Precondition: This must be called after validatePieceAndStart and during
@@ -623,7 +605,7 @@ public final class GameBoard
 	 * @param player A player
 	 * @return True if the given player has won, false otherwise
 	 */
-	public boolean playerHasWon(int playerID)
+	public boolean playerHasWon(Long playerID)
 	{
 		if (playerID == playerOneID)
 		{
@@ -818,11 +800,11 @@ public final class GameBoard
 	}
 	
 	/**
-	 * MIGHT NOT BE WORTH IT to have a second function we can just
-	 * check the other function for an empty list...
+	 * Returns true if the given player has an empty starting line,
+	 * false otherwise
 	 * 
-	 * @param player
-	 * @return
+	 * @param player Player to check
+	 * @return True if the player has an empty starting line, false otherwise
 	 */
 	private boolean hasEmptyStartingLine(Player player)
 	{
@@ -963,7 +945,7 @@ public final class GameBoard
 	private boolean violatesBacktrackRule(int pieceID, List<Point> dests)
 	{
 		Point destToTest;
-		int idToTest;
+		Integer idToTest;
 		if (gameState.getCurrentPlayerID() == playerOneID)
 		{
 			destToTest = p1History.getTwoMoveAgo();

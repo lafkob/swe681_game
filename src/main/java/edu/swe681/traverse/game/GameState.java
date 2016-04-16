@@ -9,7 +9,7 @@ import edu.swe681.traverse.game.enums.GameStatus;
 public final class GameState
 {
 	private final GameStatus status;
-	private final int currentPlayerID;
+	private final Long currentPlayerID;
 	
 	/**
 	 * Default constructor 
@@ -17,7 +17,7 @@ public final class GameState
 	 * @param status Game status
 	 * @param playerID Current player's ID
 	 */
-	public GameState(GameStatus status, int playerID)
+	public GameState(GameStatus status, Long playerID)
 	{
 		this.status = status;
 		this.currentPlayerID = playerID;
@@ -38,7 +38,7 @@ public final class GameState
 	 * 
 	 * @return The current player
 	 */
-	public int getCurrentPlayerID()
+	public Long getCurrentPlayerID()
 	{
 		return currentPlayerID;
 	}
@@ -60,7 +60,7 @@ public final class GameState
 	 * @param player Next player
 	 * @return GameState updated with the given status
 	 */
-	public GameState updatePlayer(int currentPlayerID)
+	public GameState updatePlayer(Long currentPlayerID)
 	{
 		return new GameState(this.status, currentPlayerID);
 	}

@@ -7,12 +7,17 @@ import java.awt.Point;
  */
 public final class MoveHistory
 {
-	private Point oneMoveAgo;
-	private Point twoMoveAgo;
-	private int oneIDAgo;
-	private int twoIDAgo;
+	private final Point oneMoveAgo;
+	private final Point twoMoveAgo;
+	private final Integer oneIDAgo;
+	private final Integer twoIDAgo;
 
-	public MoveHistory(Point oneMoveAgo, int oneIDAgo, Point twoMoveAgo, int twoIDAgo)
+	public MoveHistory()
+	{
+		this(null, null, null, null);
+	}
+	
+	public MoveHistory(Point oneMoveAgo, Integer oneIDAgo, Point twoMoveAgo, Integer twoIDAgo)
 	{
 		if (oneMoveAgo != null)
 			this.oneMoveAgo = new Point(oneMoveAgo.x, oneMoveAgo.y);
@@ -43,22 +48,22 @@ public final class MoveHistory
 			return new Point(twoMoveAgo.x, twoMoveAgo.y);
 	}
 
-	public int getOneIDAgo()
+	public Integer getOneIDAgo()
 	{
 		return oneIDAgo;
 	}
 
-	public int getTwoIDAgo()
+	public Integer getTwoIDAgo()
 	{
 		return twoIDAgo;
 	}
 	
-	public MoveHistory updateHistoryOne(Point oneMoveAgo, int oneIDAgo)
+	public MoveHistory updateHistoryOne(Point oneMoveAgo, Integer oneIDAgo)
 	{
 		return new MoveHistory(oneMoveAgo, oneIDAgo, this.twoMoveAgo, this.twoIDAgo);
 	}
 	
-	public MoveHistory updateHistoryTwo(Point twoMoveAgo, int twoIDAgo)
+	public MoveHistory updateHistoryTwo(Point twoMoveAgo, Integer twoIDAgo)
 	{
 		return new MoveHistory(this.oneMoveAgo, this.oneIDAgo, twoMoveAgo, twoIDAgo);
 	}

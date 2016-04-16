@@ -19,9 +19,8 @@ public class Driver {
 		GameBoard board, newBoard;
 		String input;
 		
-		board = new GameBoard(10, true);
-		board.registerPlayer(20);
-		board.registerPlayer(30);
+		board = new GameBoard(10, 20L, true);
+		board.registerPlayerTwo(30L);
 		
 		try
 		{

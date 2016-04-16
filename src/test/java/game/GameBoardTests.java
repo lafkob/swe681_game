@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.swe681.traverse.game.GameBoard;
+import edu.swe681.traverse.game.GameState;
+import edu.swe681.traverse.game.MoveHistory;
 import edu.swe681.traverse.game.enums.GameStatus;
 import edu.swe681.traverse.game.exception.*;
 
@@ -24,15 +26,14 @@ public class GameBoardTests
 	private int[][] boardSetup;
 	private int genericMoveNum;
 	private int gameID = 10;
-	private int playerOneID = 20;
-	private int playerTwoID = 30;
+	private Long playerOneID = 20L;
+	private Long playerTwoID = 30L;
 	
 	@Before
 	public void setUp()
     {
-		board = new GameBoard(gameID, false);
-		board = board.registerPlayer(playerOneID);
-		board = board.registerPlayer(playerTwoID);
+		board = new GameBoard(gameID, playerOneID, false);
+		board = board.registerPlayerTwo(playerTwoID);
 		genericMoveNum = 0;
 	}
 
@@ -61,17 +62,14 @@ public class GameBoardTests
 	{
 		/* Primarily this is just to make sure shuffle runs without breaking. Hard to 
 		 * make a hard test for randomization...*/
-		board = new GameBoard(gameID, true);
+		board = new GameBoard(gameID, playerOneID, true);
 	}
 	
 	@Test
 	public void LegalRegisterPlayerTest()
 	{
-		board = new GameBoard(gameID, false);
-		board = board.registerPlayer(playerOneID);
-		assertEquals(board.getGameState().getStatus(), GameStatus.WAITING_FOR_PLAYERS);
-		assertEquals(board.getGameState().getCurrentPlayerID(), -1);
-		board = board.registerPlayer(playerTwoID);
+		board = new GameBoard(gameID, playerOneID, false);
+		board = board.registerPlayerTwo(playerTwoID);
 		assertEquals(board.getGameState().getStatus(), GameStatus.PLAY);
 		assertEquals(board.getGameState().getCurrentPlayerID(), playerOneID);
 	}
@@ -79,21 +77,20 @@ public class GameBoardTests
 	@Test (expected=IllegalStateException.class)
 	public void IllegalRegisterPlayerTest()
 	{
-		board.registerPlayer(5);
+		board.registerPlayerTwo(5L);
 	}
 	
 	@Test (expected=IllegalStateException.class)
 	public void MoveBeforeGameStartTest() throws TraverseException
 	{
-		board = new GameBoard(gameID, false);
-		board = board.registerPlayer(playerOneID);
+		board = new GameBoard(gameID, playerOneID, false);
 		board = parseAndMakeMove(board, "0,1 0");
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void NegativeRegisterPlayerTest()
 	{
-		board.registerPlayer(-1);
+		board.registerPlayerTwo(null);
 	}
 		
 	@Test (expected=InvalidInputException.class)
@@ -165,7 +162,9 @@ public class GameBoardTests
 			    + "=  -  -  -  -  -  -  -  - =\n"
 			    + "=  8  9 10 11 12 13 14 15 =");
 		
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerOneID), new MoveHistory(),
+				new MoveHistory());
 		
 		board = parseAndMakeMove(board, "0,2 3 2 4");
 	}
@@ -203,7 +202,9 @@ public class GameBoardTests
 			    + "=  -  -  -  -  -  -  -  - =\n"
 			    + "=  8  9 10 11 12 13 14 15 =");
 
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerOneID), new MoveHistory(),
+				new MoveHistory());
 		
 		board = parseAndMakeMove(board, "6,1 8");
 	}
@@ -294,8 +295,9 @@ public class GameBoardTests
 			    + "=  -  -  -  - 13  -  -  - =\n"
 			    + "=  8  9 10 11 12  - 14 15 =");
 
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
-		board = makeGenericMoveToAdvanceTurn(board);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerTwoID), new MoveHistory(),
+				new MoveHistory());
 		
 		/* Move piece 13, player two's rightmost square,
 		 * up and over 2 so the other square, piece 12,
@@ -320,8 +322,9 @@ public class GameBoardTests
 			    + "=  -  -  -  -  - 14  -  - =\n"
 			    + "=  8  9  - 11 12 13  - 15 =");
 
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
-		board = makeGenericMoveToAdvanceTurn(board);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerTwoID), new MoveHistory(),
+				new MoveHistory());
 		
 		/* Jump 10 and 13 with piece 13, player
 		 * two's right square */
@@ -345,7 +348,9 @@ public class GameBoardTests
 			    + "=  -  -  -  -  -  -  -  - =\n"
 			    + "=  8  9 10 11 12 13 14 15 =");
 
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerOneID), new MoveHistory(),
+				new MoveHistory());
 		
 		board = parseAndMakeMove(board, "0,1 0");
 	}
@@ -365,7 +370,9 @@ public class GameBoardTests
 			    + "=  -  8  -  -  -  -  -  - =\n"
 			    + "=  0  9 10 11 12 13 14 15 =");
 
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerOneID), new MoveHistory(),
+				new MoveHistory());
 		
 		/* Try to move piece 0 into the corner */
 		board = parseAndMakeMove(board, "0,9 0");
@@ -386,7 +393,9 @@ public class GameBoardTests
 			    + "=  -  -  -  -  -  -  -  - =\n"
 			    + "=  8  9 10 11 12 13 14 15 =");
 
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerOneID), new MoveHistory(),
+				new MoveHistory());
 		
 		board = parseAndMakeMove(board, "0,0 2");
 
@@ -408,7 +417,9 @@ public class GameBoardTests
 			    + "=  -  -  -  -  -  -  -  - =\n"
 			    + "=  8  9 10 11 12 13 14 15 =");
 
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerOneID), new MoveHistory(),
+				new MoveHistory());
 
 		board = parseAndMakeMove(board, "1,2 0 4 2");
 		
@@ -430,8 +441,9 @@ public class GameBoardTests
 			    + "=  -  -  -  -  - 13  -  8 =\n"
 			    + "=  -  9 10 11  -  - 14 15 =");
 
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
-		board = makeGenericMoveToAdvanceTurn(board);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerTwoID), new MoveHistory(),
+				new MoveHistory());
 
 		/* Piece 14 should now be stuck. */
 		assertTrue("Piece 14 should not be able to move.", !board.pieceCanMove(14));
@@ -460,9 +472,10 @@ public class GameBoardTests
 			    + "=  -  -  -  -  -  -  -  - =\n"
 			    + "=  8  9 10 11 12 13 14 15 =");
 
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerTwoID), new MoveHistory(),
+				new MoveHistory());
 		
-		board = makeGenericMoveToAdvanceTurn(board);
 		/* Player ONE's row is now empty */
 
 		/* Moving one out of the second player's starting line
@@ -491,7 +504,9 @@ public class GameBoardTests
 			    + "=  -  9  - 10 11 13 15  8 =\n"
 			    + "=  -  -  -  -  -  - 14  - =");
 
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerOneID), new MoveHistory(),
+				new MoveHistory());
 		/* Start the board with Player 1's starting row
 		 * almost empty and piece 14 trapped */
 		
@@ -543,7 +558,9 @@ public class GameBoardTests
 			    + "=  -  1  -  -  -  -  -  - =\n"
 			    + "=  0  -  2  3  4  5  6  7 =");
 
-		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup);
+		board = new GameBoard(gameID, playerOneID, playerTwoID, boardSetup,
+				new GameState(GameStatus.PLAY, playerOneID), new MoveHistory(),
+				new MoveHistory());
 		
 		assertTrue("Player one should not have won yet.", !board.playerHasWon(playerOneID));
 		assertTrue("Player two should not have won yet.", !board.playerHasWon(playerTwoID));

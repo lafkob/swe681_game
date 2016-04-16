@@ -68,7 +68,7 @@ public class GamesDao {
 	public long startNewGame(long playerId) {
 		KeyHolder holder = new GeneratedKeyHolder();
 		// TODO: is this the correct starting status with one player?
-		PreparedStatementCreator psc = new CreateGamePreparedStatementCreator(playerId, GameStatus.WAITING_FOR_PLAYERS.toString());
+		PreparedStatementCreator psc = new CreateGamePreparedStatementCreator(playerId, GameStatus.WAITING_FOR_PLAYER_TWO.toString());
 		jdbcTemplate.update(psc, holder);
 		return holder.getKey().longValue();
 	}
