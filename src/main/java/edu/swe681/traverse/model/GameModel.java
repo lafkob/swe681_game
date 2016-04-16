@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.swe681.traverse.game.GameBoard;
+import edu.swe681.traverse.game.enums.GameStatus;
 
 /**
  * Represents a game model in the database. Easily mapped from an
@@ -17,30 +18,32 @@ import edu.swe681.traverse.game.GameBoard;
 public class GameModel {
 	
 	// game board
-	private String board; // serialized
+	private String board; // serialized, nullable when there is only one player
 	private long gameId;
 	private long playerOneId;
-	private long playerTwoId;
+	private long playerTwoId; // nullable, this needs to be a Long lest we get 0 in the database
 	
 	// game state
-	private String gameStatus;
-	private long currentPlayerId;
+	private GameStatus gameStatus;
+	private long currentPlayerId; // nullable, this needs to be a Long lest we get 0 in the database
 
 	// p1MoveHistory
-	private int p1OneMoveAgoX;
-	private int p1OneMoveAgoY;
-	private int p1TwoMoveAgoX;
-	private int p1TwoMoveAgoY;
-	private int p1OneIdAgo;
-	private int p1TwoIdAgo;
+	private int p1OneMoveAgoX; // nullable, this needs to be a Long lest we get 0 in the database
+	private int p1OneMoveAgoY; // nullable, this needs to be a Long lest we get 0 in the database
+	private int p1TwoMoveAgoX; // nullable, this needs to be a Long lest we get 0 in the database
+	private int p1TwoMoveAgoY; // nullable, this needs to be a Long lest we get 0 in the database
+	private int p1OneIdAgo; // nullable, this needs to be a Long lest we get 0 in the database
+	private int p1TwoIdAgo; // nullable, this needs to be a Long lest we get 0 in the database
 	
 	// p2MoveHistory
-	private int p2OneMoveAgoX;
-	private int p2OneMoveAgoY;
-	private int p2TwoMoveAgoX;
-	private int p2TwoMoveAgoY;
-	private int p2OneIdAgo;
-	private int p2TwoIdAgo;
+	private int p2OneMoveAgoX; // nullable, this needs to be a Long lest we get 0 in the database
+	private int p2OneMoveAgoY; // nullable, this needs to be a Long lest we get 0 in the database
+	private int p2TwoMoveAgoX; // nullable, this needs to be a Long lest we get 0 in the database
+	private int p2TwoMoveAgoY; // nullable, this needs to be a Long lest we get 0 in the database
+	private int p2OneIdAgo; // nullable, this needs to be a Long lest we get 0 in the database
+	private int p2TwoIdAgo; // nullable, this needs to be a Long lest we get 0 in the database
+	
+	public GameModel(){}
 	
 	public GameModel(GameBoard board) throws JsonProcessingException{
 		Objects.requireNonNull(board, "requires GameBoard");
@@ -48,30 +51,30 @@ public class GameModel {
 		// game board
 		this.board = serialize2dIntArray(board.getBoard());
 		this.gameId = board.getGameID();
-		this.playerOneId = board.getPlayerOneID();
+		this.playerOneId = board.getPlayerOneID(); // TODO: this needs to be a long
 		this.playerTwoId = board.getPlayerTwoID();
 		
 		// game state
-		this.gameStatus = board.getGameState().getStatus().toString();
-		this.currentPlayerId = board.getGameState().getCurrentPlayerID();
+		this.gameStatus = board.getGameState().getStatus();
+		this.currentPlayerId = board.getGameState().getCurrentPlayerID(); // TODO: this needs to be a Long, lest we get 0 in the database
 		
 		// p1MoveHistory
-		this.p1OneMoveAgoX = board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo().x;
-		this.p1OneMoveAgoY = board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo().y;
-		this.p1TwoMoveAgoX = board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo().x;
-		this.p1TwoMoveAgoY = board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo().y;
-		this.p1OneIdAgo = board.getMoveHistory(board.getPlayerOneID()).getOneIDAgo();
-		this.p1TwoIdAgo = board.getMoveHistory(board.getPlayerOneID()).getTwoIDAgo();
+		this.p1OneMoveAgoX = board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo().x; // TODO: this needs to be an Integer, lest we get 0 in the database
+		this.p1OneMoveAgoY = board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo().y; // TODO: this needs to be an Integer, lest we get 0 in the database
+		this.p1TwoMoveAgoX = board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo().x; // TODO: this needs to be an Integer, lest we get 0 in the database
+		this.p1TwoMoveAgoY = board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo().y; // TODO: this needs to be an Integer, lest we get 0 in the database
+		this.p1OneIdAgo = board.getMoveHistory(board.getPlayerOneID()).getOneIDAgo(); // TODO: this needs to be an Integer, lest we get 0 in the database
+		this.p1TwoIdAgo = board.getMoveHistory(board.getPlayerOneID()).getTwoIDAgo(); // TODO: this needs to be an Integer, lest we get 0 in the database
 		
 		// p2MoveHistory
-		this.p2OneMoveAgoX = board.getMoveHistory(board.getPlayerTwoID()).getOneMoveAgo().x;
-		this.p2OneMoveAgoY = board.getMoveHistory(board.getPlayerTwoID()).getOneMoveAgo().y;
-		this.p2TwoMoveAgoX = board.getMoveHistory(board.getPlayerTwoID()).getTwoMoveAgo().x;
-		this.p2TwoMoveAgoY = board.getMoveHistory(board.getPlayerTwoID()).getTwoMoveAgo().y;
-		this.p2OneIdAgo = board.getMoveHistory(board.getPlayerTwoID()).getOneIDAgo();
-		this.p2TwoIdAgo = board.getMoveHistory(board.getPlayerTwoID()).getTwoIDAgo();
+		this.p2OneMoveAgoX = board.getMoveHistory(board.getPlayerTwoID()).getOneMoveAgo().x; // TODO: this needs to be an Integer, lest we get 0 in the database
+		this.p2OneMoveAgoY = board.getMoveHistory(board.getPlayerTwoID()).getOneMoveAgo().y; // TODO: this needs to be an Integer, lest we get 0 in the database
+		this.p2TwoMoveAgoX = board.getMoveHistory(board.getPlayerTwoID()).getTwoMoveAgo().x; // TODO: this needs to be an Integer, lest we get 0 in the database
+		this.p2TwoMoveAgoY = board.getMoveHistory(board.getPlayerTwoID()).getTwoMoveAgo().y; // TODO: this needs to be an Integer, lest we get 0 in the database
+		this.p2OneIdAgo = board.getMoveHistory(board.getPlayerTwoID()).getOneIDAgo(); // TODO: this needs to be an Integer, lest we get 0 in the database
+		this.p2TwoIdAgo = board.getMoveHistory(board.getPlayerTwoID()).getTwoIDAgo(); // TODO: this needs to be an Integer, lest we get 0 in the database
 	}
-	
+
 	public int[][] boardAsArray() throws JsonParseException, JsonMappingException, IOException {
 		return deserialize2dIntArray(this.board);
 	}
@@ -116,11 +119,11 @@ public class GameModel {
 		this.playerTwoId = playerTwoId;
 	}
 
-	public String getGameStatus() {
+	public GameStatus getGameStatus() {
 		return gameStatus;
 	}
 
-	public void setGameStatus(String gameStatus) {
+	public void setGameStatus(GameStatus gameStatus) {
 		this.gameStatus = gameStatus;
 	}
 
@@ -271,10 +274,7 @@ public class GameModel {
 			return false;
 		if (gameId != other.gameId)
 			return false;
-		if (gameStatus == null) {
-			if (other.gameStatus != null)
-				return false;
-		} else if (!gameStatus.equals(other.gameStatus))
+		if (gameStatus != other.gameStatus)
 			return false;
 		if (p1OneIdAgo != other.p1OneIdAgo)
 			return false;
