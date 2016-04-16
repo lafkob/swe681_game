@@ -33,40 +33,40 @@ CREATE TABLE `traverse`.`user_roles` (
 --  one player
 -----------------------------------------------------
 CREATE TABLE `traverse`.`games` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `board` LONGTEXT NOT NULL,
-  `status` VARCHAR(64) NOT NULL,
-  `player1Id` INT NOT NULL,
-  `player2Id` INT NULL,
-  `currentPlayerId` INT NULL,
-  `p1OneMoveAgoX` INT NULL,
-  `p1OneMoveAgoY` INT NULL,
-  `p1TwoMoveAgoX` INT NULL,
-  `p1TwoMoveAgoY` INT NULL,
-  `p1OneIdAgo` INT NULL,
-  `p1TwoIdAgo` INT NULL,
-  `p2OneMoveAgoX` INT NULL,
-  `p2OneMoveAgoY` INT NULL,
-  `p2TwoMoveAgoX` INT NULL,
-  `p2TwoMoveAgoY` INT NULL,
-  `p2OneIdAgo` INT NULL,
-  `p2TwoIdAgo` INT NULL,
+  `ID` INT NOT NULL AUTO_INCREMENT,
+  `BOARD` LONGTEXT NULL,
+  `STATUS` VARCHAR(64) NOT NULL,
+  `PLAYER1_ID` INT NOT NULL,
+  `PLAYER2_ID` INT NULL,
+  `CURRENT_PLAYER_ID` INT NULL,
+  `P1_ONE_MOVE_AGO_X` INT NULL,
+  `P1_ONE_MOVE_AGO_Y` INT NULL,
+  `P1_TWO_MOVE_AGO_X` INT NULL,
+  `P1_TWO_MOVE_AGO_Y` INT NULL,
+  `P1_ONE_ID_AGO` INT NULL,
+  `P1_TWO_ID_AGO` INT NULL,
+  `P2_ONE_MOVE_AGO_X` INT NULL,
+  `P2_ONE_MOVE_AGO_Y` INT NULL,
+  `P2_TWO_MOVE_AGO_X` INT NULL,
+  `P2_TWO_MOVE_AGO_Y` INT NULL,
+  `P2_ONE_ID_AGO` INT NULL,
+  `P2_TWO_ID_AGO` INT NULL,
   PRIMARY KEY (`id`),
-  INDEX `FK_PLAYER1_idx` (`player1Id` ASC),
-  INDEX `FK_PLAYER2_idx` (`player2Id` ASC),
-  INDEX `FK_CURRENT_PLAYER_idx` (`currentPlayerId` ASC),
+  INDEX `FK_PLAYER1_idx` (`PLAYER1_ID` ASC),
+  INDEX `FK_PLAYER2_idx` (`PLAYER2_ID` ASC),
+  INDEX `FK_CURRENT_PLAYER_idx` (`CURRENT_PLAYER_ID` ASC),
   CONSTRAINT `FK_PLAYER1`
-    FOREIGN KEY (`player1Id`)
+    FOREIGN KEY (`PLAYER1_ID`)
     REFERENCES `traverse`.`users` (`ID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `FK_PLAYER2`
-    FOREIGN KEY (`player2Id`)
+    FOREIGN KEY (`PLAYER2_ID`)
     REFERENCES `traverse`.`users` (`ID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `FK_CURRENT_PLAYER`
-    FOREIGN KEY (`currentPlayerId`)
+    FOREIGN KEY (`CURRENT_PLAYER_ID`)
     REFERENCES `traverse`.`users` (`ID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
