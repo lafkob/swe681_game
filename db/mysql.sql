@@ -1,6 +1,5 @@
 CREATE SCHEMA `traverse`;
   
-
 -----------------------------------------------------
 -- DDL for users table
 -----------------------------------------------------
@@ -8,10 +7,9 @@ CREATE TABLE `traverse`.`users` (
   `ID` INT NOT NULL AUTO_INCREMENT,
   `USERNAME` VARCHAR(64) NOT NULL,
   `PASSWORD_HASH` VARCHAR(128) NOT NULL,
-  `PASSWORD_SALT` VARCHAR(32) NOT NULL,
+  `ENABLED` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`ID`),
-  UNIQUE INDEX `USERNAME_UNIQUE` (`USERNAME` ASC),
-  UNIQUE INDEX `ID_UNIQUE` (`ID` ASC));
+  UNIQUE INDEX `USERNAME_UNIQUE` (`USERNAME` ASC));
   
 
 -----------------------------------------------------
@@ -26,7 +24,12 @@ CREATE TABLE `traverse`.`user_roles` (
   KEY `FK_USERID_IDX` (`USERNAME`),
   CONSTRAINT `FK_USERID` FOREIGN KEY (`USERNAME`) REFERENCES users (`USERNAME`));
   
-
+//Try these:
+// INSERT INTO users (username, password_hash, enabled)
+// VALUES('user', '$2a$10$ol6ug.ITtxaDu8q3ox35ze6c8iYlDcJGinnxJEIAFR.PhtPeR50X6', true);
+// INSERT INTO user_roles (username, role)
+// VALUES('user', 'ROLE_USER');
+  
 -----------------------------------------------------
 -- DDL for games table
 -- -requires at least an id, a board, a status, and
