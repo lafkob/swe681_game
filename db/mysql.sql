@@ -24,11 +24,11 @@ CREATE TABLE `traverse`.`user_roles` (
   KEY `FK_USERID_IDX` (`USERNAME`),
   CONSTRAINT `FK_USERID` FOREIGN KEY (`USERNAME`) REFERENCES users (`USERNAME`));
   
-//Try these:
-// INSERT INTO users (username, password_hash, enabled)
-// VALUES('user', '$2a$10$ol6ug.ITtxaDu8q3ox35ze6c8iYlDcJGinnxJEIAFR.PhtPeR50X6', true);
-// INSERT INTO user_roles (username, role)
-// VALUES('user', 'ROLE_USER');
+--Try these:
+-- INSERT INTO users (username, password_hash, enabled)
+-- VALUES('user', '$2a$10$ol6ug.ITtxaDu8q3ox35ze6c8iYlDcJGinnxJEIAFR.PhtPeR50X6', true);
+-- INSERT INTO user_roles (username, role)
+-- VALUES('user', 'ROLE_USER');
   
 -----------------------------------------------------
 -- DDL for games table
