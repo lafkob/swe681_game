@@ -14,7 +14,7 @@ public class PasswordUtils {
 	 * @return
 	 */
 	public static String hashPassword(String password) {
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 		String hashedPassword = passwordEncoder.encode(password);
 		
 		return hashedPassword;
