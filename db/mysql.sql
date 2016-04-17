@@ -26,9 +26,16 @@ CREATE TABLE `traverse`.`user_roles` (
   
 --Try these:
 -- INSERT INTO users (username, password_hash, enabled)
--- VALUES('user', '$2a$10$ol6ug.ITtxaDu8q3ox35ze6c8iYlDcJGinnxJEIAFR.PhtPeR50X6', true);
+-- VALUES('user', '$2a$12$k4rfJbRtDYmGCHgSLMRVNOMn3UCq9ObAwuu4UIRH5VTo7IzY91iq.', true);
 -- INSERT INTO user_roles (username, role)
 -- VALUES('user', 'ROLE_USER');
+-- The hash is of 'password'
+
+-- INSERT INTO users (username, password_hash, enabled)
+-- VALUES('klazo3', '$2a$12$IQ9ksZUwbeE.GQQOuuHsLOeSZhlWtciwj.5RO3t7vIhlxajkLGJr6', true);
+-- INSERT INTO user_roles (username, role)
+-- VALUES('klazo3', 'ROLE_USER');
+-- The hash is of 'swe618'
   
 -----------------------------------------------------
 -- DDL for games table
