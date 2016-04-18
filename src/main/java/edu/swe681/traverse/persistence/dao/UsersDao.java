@@ -4,31 +4,40 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.swe681.traverse.model.UserModel;
 
 /**
  * Data access object for the users table.
  */
+@Service
 public class UsersDao {
 
-	private final String CREATE = "INSERT INTO USERS (USERNAME, PASSWORD_HASH, PASSWORD_SALT) VALUES (?, ?, ?)";
+	private final String CREATE = "INSERT INTO USERS (USERNAME, PASSWORD_HASH, ENABLED) VALUES (?, ?, true)";
+	private final String CREATE_ROLE = "INSERT INTO user_roles (username, role) VALUES(?, 'ROLE_USER')";
 	private final String FIND_BY_USERNAME = "SELECT ID, USERNAME, PASSWORD_HASH, PASSWORD_SALT FROM USERS WHERE USERNAME = ?";
 
 	private final JdbcTemplate jdbcTemplate;
 	private final UsersRowMapper mapper;
-
+	
 	@Autowired
-	public UsersDao(JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = Objects.requireNonNull(jdbcTemplate, "jdbcTemplate required");
+	public UsersDao(DataSource datasource) {
+		Objects.requireNonNull(datasource, "datasource required");
+		this.jdbcTemplate = new JdbcTemplate(datasource);
 		this.mapper = new UsersRowMapper();
 	}
 
-	public void saveUser(String username, String passwordHash, String passwordSalt) {
-		jdbcTemplate.update(CREATE, username, passwordHash, passwordSalt);
+	@Transactional // because two queries
+	public void saveUser(String username, String passwordHash) {
+		jdbcTemplate.update(CREATE, username, passwordHash);
+		jdbcTemplate.update(CREATE_ROLE, username);
 	}
 
 	public UserModel getUserByUsername(String username) {

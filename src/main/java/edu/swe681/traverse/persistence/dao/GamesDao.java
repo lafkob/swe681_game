@@ -7,12 +7,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Objects;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Service;
 
 import edu.swe681.traverse.game.enums.GameStatus;
 import edu.swe681.traverse.model.GameModel;
@@ -21,6 +24,7 @@ import edu.swe681.traverse.utils.DaoUtils;
 /**
  * Data access object for the games table.
  */
+@Service
 public class GamesDao {
 
 	private final static String SELECT = "SELECT ID, BOARD, STATUS, PLAYER1_ID, PLAYER2_ID, CURRENT_PLAYER_ID, " +
@@ -42,8 +46,9 @@ public class GamesDao {
 	private final GamesRowMapper mapper;
 	
 	@Autowired
-	public GamesDao(JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = Objects.requireNonNull(jdbcTemplate, "jdbcTemplate required");
+	public GamesDao(DataSource datasource) {
+		Objects.requireNonNull(datasource, "dataSource required");
+		this.jdbcTemplate = new JdbcTemplate(datasource);
 		mapper = new GamesRowMapper();
 	}
 	
