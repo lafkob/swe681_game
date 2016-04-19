@@ -7,16 +7,14 @@ public class UserModel {
 	private long id;
 	private String username;
 	private String passwordHash;
-	private String passwordSalt;
 	
 	public UserModel(){}
 
-	public UserModel(long id, String username, String passwordHash, String passwordSalt) {
+	public UserModel(long id, String username, String passwordHash) {
 		super();
 		this.id = id;
 		this.username = username;
 		this.passwordHash = passwordHash;
-		this.passwordSalt = passwordSalt;
 	}
 
 	public long getId() {
@@ -43,27 +41,12 @@ public class UserModel {
 		this.passwordHash = passwordHash;
 	}
 
-	public String getPasswordSalt() {
-		return passwordSalt;
-	}
-
-	public void setPasswordSalt(String passwordSalt) {
-		this.passwordSalt = passwordSalt;
-	}
-
-	@Override
-	public String toString() {
-		return "UserModel [id=" + id + ", username=" + username + ", passwordHash=" + passwordHash + ", passwordSalt="
-				+ passwordSalt + "]";
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((passwordHash == null) ? 0 : passwordHash.hashCode());
-		result = prime * result + ((passwordSalt == null) ? 0 : passwordSalt.hashCode());
 		result = prime * result + ((username == null) ? 0 : username.hashCode());
 		return result;
 	}
@@ -84,16 +67,16 @@ public class UserModel {
 				return false;
 		} else if (!passwordHash.equals(other.passwordHash))
 			return false;
-		if (passwordSalt == null) {
-			if (other.passwordSalt != null)
-				return false;
-		} else if (!passwordSalt.equals(other.passwordSalt))
-			return false;
 		if (username == null) {
 			if (other.username != null)
 				return false;
 		} else if (!username.equals(other.username))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "UserModel [id=" + id + ", username=" + username + ", passwordHash=" + passwordHash + "]";
 	}
 }
