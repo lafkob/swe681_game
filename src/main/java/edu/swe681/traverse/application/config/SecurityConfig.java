@@ -12,25 +12,32 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter
-{
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	DataSource dataSource;
-	
-	// TODO: Need to pick a strength we think is good. I read somewhere
-	// that 12 is the least we'd want to go, though I've seen 10 in a lot of places
-	// too...
+
 	private final PasswordEncoder encoder = new BCryptPasswordEncoder(12);
-	
+
 	@Autowired
 	public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-		
-	  auth.jdbcAuthentication()
-	  	.dataSource(dataSource)
-	  	.passwordEncoder(encoder)
-		.usersByUsernameQuery(
-			"SELECT username,password_hash,enabled FROM users WHERE username=?")
-		.authoritiesByUsernameQuery(
-			"SELECT username, role FROM user_roles WHERE username=?");
+
+		auth.jdbcAuthentication()
+			.dataSource(dataSource)
+			.passwordEncoder(encoder)
+			.usersByUsernameQuery("SELECT username,password_hash,enabled FROM users WHERE username=?")
+			.authoritiesByUsernameQuery("SELECT username, role FROM user_roles WHERE username=?");
 	}
+
+//	@Override
+//	protected void configure(HttpSecurity http) throws Exception {
+//		http
+//			.authorizeRequests()
+//				.antMatchers("/api/register").anonymous()
+//				.anyRequest()
+//				.authenticated()
+//				.and()
+//			.formLogin()
+//				.loginPage("/login.jsp")
+//				.permitAll();
+//	}
 }
