@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -35,9 +35,9 @@ public class UserRegistrationController {
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<String> registerUser(@ModelAttribute @Valid UserRegistrationDto requestDto) {
+	public ResponseEntity<String> registerUser(@RequestBody @Valid UserRegistrationDto requestDto) {
 		
-		if(usersDao.getUserByUsername(requestDto.getUsername())  != null) {
+		if(usersDao.doesUsernameExist(requestDto.getUsername())) {
 			// TODO: exception for user already exists
 		}
 		
@@ -45,7 +45,10 @@ public class UserRegistrationController {
 			// TODO: exception for passwords do not match
 		}
 		
+		// TODO:
+		// @Pattern(regexp="", message="") on the requestDto for passwords and usernames
+		
 		usersDao.saveUser(requestDto.getUsername(), encoder.encode(requestDto.getPassword()));
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 }

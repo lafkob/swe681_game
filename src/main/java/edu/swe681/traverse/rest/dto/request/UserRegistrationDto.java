@@ -10,16 +10,18 @@ import org.hibernate.validator.constraints.NotBlank;
 public class UserRegistrationDto {
 	
 	@NotBlank
-	@Size(min=8, max=32, message="Username must be between 8 and 32 characters")
+	@Size(min=8, max=32)
 	private String username;
 
 	@NotBlank
-	@Size(min=10, max=32, message="Password must be between 10 and 32 characters")
+	@Size(min=10, max=32)
 	private String password;
 
 	@NotBlank
-	@Size(min=10, max=32, message="Password confirmation must be between 10 and 32 characters and match password")
+	@Size(min=10, max=32)
 	private String passwordConfirm;
+	
+	public UserRegistrationDto(){}
 
 	public UserRegistrationDto(String username, String password, String passwordConfirm) {
 		super();
