@@ -95,4 +95,8 @@ public class GameRestController {
 		// TODO: audit the call
 		return new GameStatusResponseDto(moveRequest.getGameId());
 	}
+	
+	// TODO: way to list the games
+	// TODO: way to get the move list for a given game
+	// TODO: way to get win-loss record for a given user
 }
