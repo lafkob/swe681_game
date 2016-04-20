@@ -24,7 +24,7 @@ public class ValidationExceptionResponseDto {
 		}
 		
 		if(e.getBindingResult().getGlobalErrorCount() > 0) {
-			globalErrors = new ArrayList<>(e.getBindingResult().getFieldErrorCount());
+			globalErrors = new ArrayList<>(e.getBindingResult().getGlobalErrorCount());
 			for(ObjectError err : e.getBindingResult().getGlobalErrors()) {
 				globalErrors.add(new ValidationError(err.getObjectName(), err.getDefaultMessage()));
 			}
