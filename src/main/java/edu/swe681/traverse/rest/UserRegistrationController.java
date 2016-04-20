@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.swe681.traverse.persistence.dao.UsersDao;
 import edu.swe681.traverse.rest.dto.request.UserRegistrationDto;
+import edu.swe681.traverse.rest.exception.*;
 
 /**
  * REST controller for the registration API.
@@ -35,18 +36,23 @@ public class UserRegistrationController {
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<String> registerUser(@RequestBody @Valid UserRegistrationDto requestDto) {
+	public ResponseEntity<String> registerUser(@RequestBody @Valid UserRegistrationDto requestDto)
+		throws TraverseRestException
+	{
 		
 		if(usersDao.doesUsernameExist(requestDto.getUsername())) {
-			// TODO: exception for user already exists
+			// TODO: Need a ResponseDTO for these kind of exceptions and to add to GlobalHandler?
+			throw new UsernameAlreadyExistsException();
 		}
 		
 		if(!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
-			// TODO: exception for passwords do not match
+			// TODO: Need a ResponseDTO for these kind of exceptions and to add to GlobalHandler?
+			throw new PasswordsDoNotMatchException();
 		}
 		
 		// TODO:
 		// @Pattern(regexp="", message="") on the requestDto for passwords and usernames
+		// Suggestion: regexp="^[a-zA-Z0-9]{4,64}$"
 		
 		usersDao.saveUser(requestDto.getUsername(), encoder.encode(requestDto.getPassword()));
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
