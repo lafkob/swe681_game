@@ -16,13 +16,16 @@ CREATE TABLE `traverse`.`users` (
 -- DDL for user_roles table
 -----------------------------------------------------
 CREATE TABLE `traverse`.`user_roles` (
-  `USER_ROLE_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `USER_ROLE_ID` INT NOT NULL AUTO_INCREMENT,
   `USERNAME` VARCHAR(64) NOT NULL,
   `ROLE` varchar(64) NOT NULL,
   PRIMARY KEY (`USER_ROLE_ID`),
   UNIQUE KEY `USERNAME_ROLE_UNIQUE` (`ROLE`,`USERNAME`),
   KEY `FK_USERID_IDX` (`USERNAME`),
-  CONSTRAINT `FK_USERID` FOREIGN KEY (`USERNAME`) REFERENCES users (`USERNAME`));
+  CONSTRAINT `FK_USERID`
+  	FOREIGN KEY (`USERNAME`)
+  	REFERENCES users (`USERNAME`)
+  	ON DELETE CASCADE);
   
 --Try these:
 -- INSERT INTO users (username, password_hash, enabled)
@@ -80,4 +83,20 @@ CREATE TABLE `traverse`.`games` (
     REFERENCES `traverse`.`users` (`ID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+
+-----------------------------------------------------
+-- DDL for statistics table
+-----------------------------------------------------
+CREATE TABLE `traverse`.`statistics` (
+  `ID` INT NOT NULL,
+  `WIN` INT NOT NULL,
+  `LOSS` INT NOT NULL,
+  `DRAW` INT NOT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `FK_USERID` (`ID`),
+  CONSTRAINT `FK_USERID`
+  	FOREIGN KEY (`ID`)
+  	REFERENCES `traverse`.`users` (`ID`),
+  	ON DELETE CASCADE);
+
 
