@@ -27,7 +27,7 @@ public class GlobalExceptionHandlers {
 	 * @param e
 	 * @return
 	 */
-	@ExceptionHandler({ MethodArgumentNotValidException.class })
+	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	public ValidationExceptionResponseDto handleValidationException(MethodArgumentNotValidException e) {
@@ -44,7 +44,7 @@ public class GlobalExceptionHandlers {
 	@ExceptionHandler({ BadRequestException.class })
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-	public MessageOnlyExceptionResponseDto handleBadRequestException(BadRequestException e) {
+	public MessageOnlyExceptionResponseDto handleBadRequestException(Exception e) {
 		return new MessageOnlyExceptionResponseDto(e.getMessage());
 	}
 
@@ -58,7 +58,7 @@ public class GlobalExceptionHandlers {
 	@ExceptionHandler({ NotFoundException.class })
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.NOT_FOUND)
-	public MessageOnlyExceptionResponseDto handleNotFoundException(NotFoundException e) {
+	public MessageOnlyExceptionResponseDto handleNotFoundException(Exception e) {
 		return new MessageOnlyExceptionResponseDto(e.getMessage());
 	}
 	
@@ -87,7 +87,7 @@ public class GlobalExceptionHandlers {
 	@ExceptionHandler({ NotYetImplementedException.class })
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED)
-	public MessageOnlyExceptionResponseDto notImplementedHandler(NotYetImplementedException e) {
+	public MessageOnlyExceptionResponseDto notImplementedHandler(Exception e) {
 		return new MessageOnlyExceptionResponseDto("Method not yet implemented");
 	}
 }
