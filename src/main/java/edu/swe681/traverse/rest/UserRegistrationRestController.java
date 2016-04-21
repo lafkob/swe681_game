@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.swe681.traverse.application.exception.BadRequestException;
 import edu.swe681.traverse.persistence.dao.UsersDao;
 import edu.swe681.traverse.rest.dto.request.UserRegistrationDto;
 
@@ -21,7 +22,7 @@ import edu.swe681.traverse.rest.dto.request.UserRegistrationDto;
  */
 @RestController
 @RequestMapping(value="/api/register")
-public class UserRegistrationController {
+public class UserRegistrationRestController {
 	
 	@Autowired
 	private UsersDao usersDao;
@@ -32,17 +33,18 @@ public class UserRegistrationController {
 	 * 
 	 * @param requestDto Contains the username and password
 	 * @return 200
+	 * @throws BadRequestException 
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<String> registerUser(@RequestBody @Valid UserRegistrationDto requestDto) {
+	public ResponseEntity<String> registerUser(@RequestBody @Valid UserRegistrationDto requestDto) throws BadRequestException {
 		
 		if(usersDao.doesUsernameExist(requestDto.getUsername())) {
-			// TODO: exception for user already exists
+			throw new BadRequestException("Username is already in use");
 		}
 		
 		if(!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
-			// TODO: exception for passwords do not match
+			throw new BadRequestException("Passwords do not match");
 		}
 		
 		// TODO:
