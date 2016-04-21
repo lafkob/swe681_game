@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Objects;
 
 import javax.sql.DataSource;
@@ -30,7 +31,7 @@ public class GamesDao {
 	private final static String SELECT = "SELECT ID, BOARD, STATUS, PLAYER1_ID, PLAYER2_ID, CURRENT_PLAYER_ID, " +
 			"P1_ONE_MOVE_AGO_X, P1_ONE_MOVE_AGO_Y, P1_TWO_MOVE_AGO_X, P1_TWO_MOVE_AGO_Y, P1_ONE_ID_AGO, P1_TWO_ID_AGO, " +
 			"P2_ONE_MOVE_AGO_X, P2_ONE_MOVE_AGO_Y, P2_TWO_MOVE_AGO_X, P2_TWO_MOVE_AGO_Y, P2_ONE_ID_AGO, P2_TWO_ID_AGO " +
-			"FROM GAMES";
+			"FROM GAMES ";
 	private final static String FIND_BY_ID = SELECT + "WHERE ID = ?";
 	
 	private final static String CREATE_GAME = "INSERT INTO GAMES (PLAYER1_ID, STATUS) VALUES (?, ?)";
@@ -72,7 +73,6 @@ public class GamesDao {
 	 */
 	public long startNewGame(long playerId) {
 		KeyHolder holder = new GeneratedKeyHolder();
-		// TODO: is this the correct starting status with one player?
 		PreparedStatementCreator psc = new CreateGamePreparedStatementCreator(playerId, GameStatus.WAITING_FOR_PLAYER_TWO.toString());
 		jdbcTemplate.update(psc, holder);
 		return holder.getKey().longValue();
@@ -85,7 +85,9 @@ public class GamesDao {
 	 * @return GameModel representing the row
 	 */
 	public GameModel getGameById(long gameId) {
-		return jdbcTemplate.queryForObject(FIND_BY_ID, mapper, gameId);
+		List<GameModel> matches = jdbcTemplate.query(FIND_BY_ID, mapper, gameId);
+		if(matches.size() == 0) return null;
+		else return matches.get(0); // shouldn't be finding more than one for a game id!
 	}
 	
 	/**
@@ -99,7 +101,8 @@ public class GamesDao {
 				m.getP2OneMoveAgoX(), m.getP2OneMoveAgoY(), m.getP2TwoMoveAgoX(), m.getP2TwoMoveAgoY(), m.getP2OneIdAgo(), m.getP2TwoIdAgo(), 
 				m.getGameId());
 	}
-
+	
+	// TODO: get all games with filters for: a given user id, a given status (to find open games)
 	
 	/**
 	 * Maps a ResultSet row from the games table to a GameModel
