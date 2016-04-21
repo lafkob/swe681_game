@@ -1,9 +1,10 @@
 package edu.swe681.traverse.rest;
 
-import java.util.Random;
+import java.security.Principal;
 
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +13,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.swe681.traverse.application.exception.BadRequestException;
+import edu.swe681.traverse.application.exception.NotFoundException;
+import edu.swe681.traverse.application.exception.NotYetImplementedException;
+import edu.swe681.traverse.model.GameModel;
+import edu.swe681.traverse.persistence.dao.GamesDao;
+import edu.swe681.traverse.persistence.dao.UsersDao;
 import edu.swe681.traverse.rest.dto.request.GameRequestDto;
 import edu.swe681.traverse.rest.dto.request.JoinRequestDto;
 import edu.swe681.traverse.rest.dto.request.MoveRequestDto;
@@ -26,18 +33,30 @@ import edu.swe681.traverse.rest.dto.response.GameStatusResponseDto;
 @RequestMapping(value="/api/game")
 public class GameRestController {
 	
+	@Autowired
+	private GamesDao gamesDao;
+	
+	@Autowired
+	private UsersDao usersDao;
+	
 	/**
 	 * Starts a new game. Player will be the only player in the game.
 	 * 
 	 * @return Response with the new gameId
+	 * @throws BadRequestException 
 	 */
 	@RequestMapping(value="/start", method = RequestMethod.POST)
 	@ResponseBody
-	public GameResponseDto startNewGame() {
-		// TODO: get the user and make sure they are not already in an active game
+	public GameResponseDto startNewGame(Principal principal) throws BadRequestException {
+		final long userId = usersDao.getUserByUsername(principal.getName()).getId();
+		if(gamesDao.isPlayerCurrentlyInAGame(userId)) {
+			// TODO: audit this?
+			throw new BadRequestException("User is already in a game.");
+		}
+		
 		// TODO: auditing stuff
-		// TODO: set up the game and get a unique id
-		return new GameResponseDto(new Random().nextLong());
+		final long gameId = gamesDao.startNewGame(userId);
+		return new GameResponseDto(gameId);
 	}
 	
 	
@@ -48,52 +67,78 @@ public class GameRestController {
 	 * 
 	 * @param dto Request containing the gameId
 	 * @return 200
+	 * @throws NotFoundException 
+	 * @throws NotYetImplementedException 
 	 */
 	@RequestMapping(value="/quit", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<String> quitGame(@Valid @RequestBody GameRequestDto dto) {
-		// TODO: get the user and make sure they are in the game they requested to leave
+	public ResponseEntity<String> quitGame(@Valid @RequestBody GameRequestDto dto, Principal principal)
+			throws NotFoundException, NotYetImplementedException {
+		final GameModel game = gamesDao.getGameById(dto.getGameId());
+		final long userId = usersDao.getUserByUsername(principal.getName()).getId();
+		
+		// make sure the user is in the game, don't give a specific error as
+		// to whether the game exists
+		if (game == null || !game.isUserInGame(userId)) {
+			// TODO: audit this?
+			throw new NotFoundException("No game found for user");
+		}
+		
 		// TODO: update the game state:
 		// if in progress other user wins
 		// if not started, remove user
 		// is there an ended state?
 		// TODO: auditing stuff
+
+		// TODO: remove
+		throw new NotYetImplementedException();
 		
-		return new ResponseEntity<>(HttpStatus.OK);
+//		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	
 	// TODO: document
 	@RequestMapping(value="/join", method = RequestMethod.POST)
 	@ResponseBody
-	public GameStatusResponseDto joinGame(@Valid @RequestBody JoinRequestDto joinRequest) {
+	public GameStatusResponseDto joinGame(@Valid @RequestBody JoinRequestDto joinRequest) throws NotYetImplementedException {
 		// TODO: get the user and make sure they are not already in a game
 		// TODO: update the game state to show this user in it
 		// TODO: auditing stuff
 		// TODO: return the full game state
-		return new GameStatusResponseDto(joinRequest.getGameId());
+		
+		// TODO: remove
+		throw new NotYetImplementedException();
+//		return new GameStatusResponseDto(joinRequest.getGameId());
 	}
 
 
 	// TODO: document
 	@RequestMapping(value="/status", method = RequestMethod.POST)
 	@ResponseBody
-	public GameStatusResponseDto getStatus(@Valid @RequestBody StatusRequestDto statusRequest) {
+	public GameStatusResponseDto getStatus(@Valid @RequestBody StatusRequestDto statusRequest) throws NotYetImplementedException {
 		// TODO: get the user and make sure they are in the game being requested
 		// TODO: get the game state and populate it fully
 		// TODO: audit the call?
-		return new GameStatusResponseDto(statusRequest.getGameId());
+
+		// TODO: remove
+		throw new NotYetImplementedException();
+		
+//		return new GameStatusResponseDto(statusRequest.getGameId());
 	}
 	
 
 	// TODO: document
 	@RequestMapping(value="/move", method = RequestMethod.POST)
 	@ResponseBody
-	public GameStatusResponseDto makeMove(@Valid @RequestBody MoveRequestDto moveRequest) {
+	public GameStatusResponseDto makeMove(@Valid @RequestBody MoveRequestDto moveRequest) throws NotYetImplementedException {
 		// TODO: get the user and make sure they are in the game for the move
 		// TODO: update the game state, exceptions will be thrown and handled globally
 		// TODO: audit the call
-		return new GameStatusResponseDto(moveRequest.getGameId());
+
+		// TODO: remove
+		throw new NotYetImplementedException();
+		
+//		return new GameStatusResponseDto(moveRequest.getGameId());
 	}
 	
 	// TODO: way to list the games
