@@ -1,5 +1,6 @@
 package edu.swe681.traverse.rest.dto.request;
 
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -7,23 +8,26 @@ import org.hibernate.validator.constraints.NotBlank;
 /**
  * DTO for information submitted for user registration.
  */
-public class UserRegistrationDto {
+public class UserRegistrationRequestDto {
 	
 	@NotBlank
 	@Size(min=8, max=32)
+	@Pattern(regexp="^[A-Za-z0-9]*$", message="usernames can only contain letters and numbers")
 	private String username;
 
 	@NotBlank
 	@Size(min=10, max=32)
+	@Pattern(regexp="^[A-Za-z0-9_!#$%+=@()]*$", message="passwords can only contain letters, numbers, and characters _ ! # $ % + = @ ( )")
 	private String password;
 
 	@NotBlank
 	@Size(min=10, max=32)
+	@Pattern(regexp="^[A-Za-z0-9_!#$%+=@()]*$", message="passwords can only contain letters, numbers, and characters _ ! # $ % + = @ ( )")
 	private String passwordConfirm;
 	
-	public UserRegistrationDto(){}
+	public UserRegistrationRequestDto(){}
 
-	public UserRegistrationDto(String username, String password, String passwordConfirm) {
+	public UserRegistrationRequestDto(String username, String password, String passwordConfirm) {
 		super();
 		this.username = username;
 		this.password = password;
@@ -72,7 +76,7 @@ public class UserRegistrationDto {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		UserRegistrationDto other = (UserRegistrationDto) obj;
+		UserRegistrationRequestDto other = (UserRegistrationRequestDto) obj;
 		if (password == null) {
 			if (other.password != null)
 				return false;

@@ -13,16 +13,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.swe681.traverse.application.exception.BadRequestException;
 import edu.swe681.traverse.persistence.dao.UsersDao;
-import edu.swe681.traverse.rest.dto.request.UserRegistrationDto;
-import edu.swe681.traverse.rest.exception.*;
+import edu.swe681.traverse.rest.dto.request.UserRegistrationRequestDto;
 
 /**
  * REST controller for the registration API.
  */
 @RestController
 @RequestMapping(value="/api/register")
-public class UserRegistrationController {
+public class UserRegistrationRestController {
 	
 	@Autowired
 	private UsersDao usersDao;
@@ -33,26 +33,19 @@ public class UserRegistrationController {
 	 * 
 	 * @param requestDto Contains the username and password
 	 * @return 200
+	 * @throws BadRequestException 
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<String> registerUser(@RequestBody @Valid UserRegistrationDto requestDto)
-		throws TraverseRestException
-	{
+	public ResponseEntity<String> registerUser(@RequestBody @Valid UserRegistrationRequestDto requestDto) throws BadRequestException {
 		
 		if(usersDao.doesUsernameExist(requestDto.getUsername())) {
-			// TODO: Need a ResponseDTO for these kind of exceptions and to add to GlobalHandler?
-			throw new UsernameAlreadyExistsException();
+			throw new BadRequestException("Username is already in use");
 		}
 		
 		if(!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
-			// TODO: Need a ResponseDTO for these kind of exceptions and to add to GlobalHandler?
-			throw new PasswordsDoNotMatchException();
+			throw new BadRequestException("Passwords do not match");
 		}
-		
-		// TODO:
-		// @Pattern(regexp="", message="") on the requestDto for passwords and usernames
-		// Suggestion: regexp="^[a-zA-Z0-9]{4,64}$"
 		
 		usersDao.saveUser(requestDto.getUsername(), encoder.encode(requestDto.getPassword()));
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
