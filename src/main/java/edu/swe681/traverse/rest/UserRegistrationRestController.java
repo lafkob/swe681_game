@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.swe681.traverse.application.exception.BadRequestException;
 import edu.swe681.traverse.persistence.dao.UsersDao;
-import edu.swe681.traverse.rest.dto.request.UserRegistrationDto;
+import edu.swe681.traverse.rest.dto.request.UserRegistrationRequestDto;
 
 /**
  * REST controller for the registration API.
@@ -37,7 +37,7 @@ public class UserRegistrationRestController {
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<String> registerUser(@RequestBody @Valid UserRegistrationDto requestDto) throws BadRequestException {
+	public ResponseEntity<String> registerUser(@RequestBody @Valid UserRegistrationRequestDto requestDto) throws BadRequestException {
 		
 		if(usersDao.doesUsernameExist(requestDto.getUsername())) {
 			throw new BadRequestException("Username is already in use");
@@ -46,9 +46,6 @@ public class UserRegistrationRestController {
 		if(!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
 			throw new BadRequestException("Passwords do not match");
 		}
-		
-		// TODO:
-		// @Pattern(regexp="", message="") on the requestDto for passwords and usernames
 		
 		usersDao.saveUser(requestDto.getUsername(), encoder.encode(requestDto.getPassword()));
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
