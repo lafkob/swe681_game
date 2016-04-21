@@ -1,5 +1,6 @@
 package edu.swe681.traverse.application;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -59,6 +60,20 @@ public class GlobalExceptionHandlers {
 	@ResponseStatus(value = HttpStatus.NOT_FOUND)
 	public MessageOnlyExceptionResponseDto handleNotFoundException(NotFoundException e) {
 		return new MessageOnlyExceptionResponseDto(e.getMessage());
+	}
+	
+	/**
+	 * Handler for exceptions that result in a 505 - InternalServerError status with a
+	 * single string error message.
+	 * 
+	 * @param e
+	 * @return
+	 */
+	@ExceptionHandler({ DataAccessException.class })
+	@ResponseBody
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	public MessageOnlyExceptionResponseDto handleDataAccessException(Exception e) {
+		return new MessageOnlyExceptionResponseDto("An internal error has occurred, please contact admin");
 	}
 
 	// TODO: this handler should go away, as we will have everything implemented :)
