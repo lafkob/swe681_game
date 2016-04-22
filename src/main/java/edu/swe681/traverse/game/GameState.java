@@ -9,6 +9,9 @@ import edu.swe681.traverse.game.enums.GameStatus;
 public final class GameState
 {
 	private final GameStatus status;
+	/* Should be null when the status is WAITING_FOR_PLAYER_TWO.
+	 * If the status is in a WIN or FORFEIT state, this represents
+	 * the winner of the completed game. */
 	private final Long currentPlayerID;
 	
 	/**
@@ -63,5 +66,33 @@ public final class GameState
 	public GameState updatePlayer(Long currentPlayerID)
 	{
 		return new GameState(this.status, currentPlayerID);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((currentPlayerID == null) ? 0 : currentPlayerID.hashCode());
+		result = prime * result + ((status == null) ? 0 : status.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		GameState other = (GameState) obj;
+		if (currentPlayerID == null) {
+			if (other.currentPlayerID != null)
+				return false;
+		} else if (!currentPlayerID.equals(other.currentPlayerID))
+			return false;
+		if (status != other.status)
+			return false;
+		return true;
 	}
 }

@@ -157,24 +157,19 @@ public final class GameBoard
 	}
 	
 	public GameBoard(GameModel model) throws JsonParseException, JsonMappingException, IOException
-	{
+	{	
 		this(
 			model.getGameId(),
 			model.getPlayerOneId(),
 			model.getPlayerTwoId(),
 			model.boardAsArray(),
 			new GameState(model.getGameStatus(), model.getCurrentPlayerId()),
-			new MoveHistory(
-				new Point(model.getP1OneMoveAgoX(), model.getP1OneMoveAgoY()),
-				model.getP1OneIdAgo(),
-				new Point(model.getP1TwoMoveAgoX(), model.getP1TwoMoveAgoY()),
-				model.getP1TwoIdAgo()),
-			new MoveHistory(
-					new Point(model.getP1OneMoveAgoX(), model.getP1OneMoveAgoY()),
-					model.getP1OneIdAgo(),
-					new Point(model.getP1TwoMoveAgoX(), model.getP1TwoMoveAgoY()),
-					model.getP1TwoIdAgo())
-		);
+			new MoveHistory(model.getP1OneMoveAgoX(), model.getP1OneMoveAgoY(),
+					model.getP1OneIdAgo(), model.getP1TwoMoveAgoX(),
+					model.getP1TwoMoveAgoY(), model.getP1TwoIdAgo()),
+			new MoveHistory(model.getP2OneMoveAgoX(), model.getP2OneMoveAgoY(),
+					model.getP2OneIdAgo(), model.getP2TwoMoveAgoX(),
+					model.getP2TwoMoveAgoY(), model.getP2TwoIdAgo()));
 	}
 	
 	/**
@@ -185,21 +180,61 @@ public final class GameBoard
 	 * @throws IllegalStateException If all players are already registered
 	 * @throws IllegalArgumentException If player ID is less than 0
 	 */
-	public GameBoard registerPlayerTwo(Long playerID)
+	public GameBoard registerPlayerTwo(Long playerID) throws TraverseException
 	{
 		GameBoard newBoard = new GameBoard(this);
 		
+		if (this.gameState.getStatus() != GameStatus.WAITING_FOR_PLAYER_TWO)
+		{
+			throw new InvalidGameStateException("Player cannot be registered at this time.");
+		}
+		
 		if (playerID == null || playerID < 0)
 		{
-			throw new IllegalArgumentException("PlayerID must be positive.");
+			throw new InvalidGameInputException("PlayerID must be positive.");
 		}
 		
 		if (this.playerTwoID != null)
-			throw new IllegalStateException("Both players are already registered.");
+			throw new InvalidGameStateException("Both players are already registered.");
 		
 		newBoard.playerTwoID = playerID;
 		newBoard.gameState = gameState.updateStatus(GameStatus.PLAY).updatePlayer(playerOneID);
 		
+		return newBoard;
+	}
+	
+	/**
+	 * Returns a new board in which the given player has
+	 * forfeit the game.
+	 * 
+	 * @param playerID The ID of the player that has forfeit
+	 * @return A new board with the new forfeit status
+	 */
+	public GameBoard forfeitGame(Long playerID) throws TraverseException
+	{
+		Long winningPlayerID;
+		GameBoard newBoard = new GameBoard(this);
+		
+		if (this.gameState.getStatus() != GameStatus.PLAY)
+		{
+			throw new InvalidGameStateException("Players may not forfeit at this time.");
+		}
+		
+		if (playerID == playerOneID)
+		{
+			winningPlayerID = playerTwoID;
+		}
+		if (playerID == playerTwoID)
+		{
+			winningPlayerID = playerOneID;
+		}
+		else
+		{
+			throw new InvalidGameInputException("The given player is not in the game.");
+		}
+		
+		newBoard.gameState = gameState.updateStatus(GameStatus.FORFEIT)
+									  .updatePlayer(winningPlayerID);		
 		return newBoard;
 	}
 	
@@ -249,11 +284,11 @@ public final class GameBoard
 	 * @param pieceID A piece identifier
 	 * @return The location of the piece on the board
 	 */
-	public Point getPieceLocation(int pieceID)
+	public Point getPieceLocation(int pieceID) throws TraverseException
 	{
 		if (!(pieceID >= 0 && pieceID < Game.NUM_PIECES))
 		{
-			throw new IllegalArgumentException("PieceID must be between 1 and 15.");
+			throw new InvalidGameInputException("PieceID must be between 1 and 15.");
 		}
 		
 		for (int row = 0; row < SIZE; row++)
@@ -335,15 +370,15 @@ public final class GameBoard
 		Point start;
 		
 		if (gameState.getStatus() == GameStatus.WAITING_FOR_PLAYER_TWO)
-			throw new IllegalStateException("Cannot make move while waiting for players.");
+			throw new InvalidGameStateException("Cannot make move while waiting for players.");
 		if (gameState.getStatus() == GameStatus.WIN)
-			throw new IllegalStateException(String.format("Cannot make move. Player %d has won.",
+			throw new InvalidGameStateException(String.format("Cannot make move. Player %d has won.",
 					gameState.getCurrentPlayerID()));
 		
 		/* The piece must be between 0 and NUM_PIECES(16).*/
 		if (!(pieceID >= 0 && pieceID < Game.NUM_PIECES))
 		{
-			throw new InvalidInputException(String.format("The given piece ID (%d) is "
+			throw new InvalidGameInputException(String.format("The given piece ID (%d) is "
 				+ "invalid.", pieceID));
 		}
 		
@@ -413,7 +448,7 @@ public final class GameBoard
 		 * but just in case... */
 		if (dests.isEmpty())
 		{
-			throw new InvalidInputException("Moves are incomplete. No destinations provided.");
+			throw new InvalidGameInputException("Moves are incomplete. No destinations provided.");
 		}
 		
 		/* That is not the player's piece */
@@ -480,7 +515,7 @@ public final class GameBoard
 		if (!(dest.x >= 0 && dest.x < SIZE &&
 			  dest.y >= 0 && dest.y < SIZE))
 		{
-			throw new InvalidInputException(String.format("The location [%d,%d] is not "
+			throw new InvalidGameInputException(String.format("The location [%d,%d] is not "
 					+ "on the board.", dest.x, dest.y), start, dest);
 		}
 		
@@ -662,7 +697,7 @@ public final class GameBoard
 	 * 
 	 * @return True if moves are available, false otherwise.
 	 */
-	public boolean movesAreAvailable()
+	public boolean movesAreAvailable() throws TraverseException
 	{
 		return otherMovesAreAvailable(-1);
 	}
@@ -674,7 +709,7 @@ public final class GameBoard
 	 * @param excludedPieceID Piece that will not be checked for available moves
 	 * @return True if moves are available, false otherwise.
 	 */
-	private boolean otherMovesAreAvailable(int excludedPieceID)
+	private boolean otherMovesAreAvailable(int excludedPieceID) throws TraverseException
 	{
 		if (gameState.getCurrentPlayerID() == playerOneID)
 		{
@@ -706,7 +741,7 @@ public final class GameBoard
 	 * @param pieceID Identifies a piece
 	 * @return A list of legal moves for the piece
 	 */
-	public boolean pieceCanMove(int pieceID)
+	public boolean pieceCanMove(int pieceID) throws TraverseException
 	{
 		List<Point> dests;
 		Point start, dest;
@@ -880,7 +915,7 @@ public final class GameBoard
 	 * 
 	 * @return True if the rule is being violated, false otherwise
 	 */
-	private boolean violatesOpponentEmptyStartingLineRule(Point start)
+	private boolean violatesOpponentEmptyStartingLineRule(Point start) throws TraverseException
 	{
 		List<Integer> startingRowVals;
 		Player currentPlayer, opponent;
@@ -942,7 +977,7 @@ public final class GameBoard
 	 * @param dests Move destinations
 	 * @return True if the rule is violated, false otherwise
 	 */
-	private boolean violatesBacktrackRule(int pieceID, List<Point> dests)
+	private boolean violatesBacktrackRule(int pieceID, List<Point> dests) throws TraverseException
 	{
 		Point destToTest;
 		Integer idToTest;
