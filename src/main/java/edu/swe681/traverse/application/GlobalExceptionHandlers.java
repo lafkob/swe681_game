@@ -14,6 +14,7 @@ import edu.swe681.traverse.application.exception.BadRequestException;
 import edu.swe681.traverse.application.exception.InternalServerException;
 import edu.swe681.traverse.application.exception.NotFoundException;
 import edu.swe681.traverse.application.exception.NotYetImplementedException;
+import edu.swe681.traverse.game.exception.TraverseException;
 import edu.swe681.traverse.rest.dto.response.MessageOnlyExceptionResponseDto;
 import edu.swe681.traverse.rest.dto.response.ValidationExceptionResponseDto;
 
@@ -47,7 +48,7 @@ public class GlobalExceptionHandlers {
 	 * @param e
 	 * @return
 	 */
-	@ExceptionHandler({ BadRequestException.class })
+	@ExceptionHandler({ BadRequestException.class, TraverseException.class })
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	public MessageOnlyExceptionResponseDto handleBadRequestException(Exception e) {
