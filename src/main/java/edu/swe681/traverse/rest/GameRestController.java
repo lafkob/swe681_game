@@ -76,11 +76,12 @@ public class GameRestController {
 	 * @throws NotFoundException 
 	 * @throws NotYetImplementedException 
 	 * @throws InternalServerException 
+	 * @throws TraverseException 
 	 */
 	@RequestMapping(value="/quit", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<String> quitGame(@Valid @RequestBody GameRequestDto dto, Principal principal)
-			throws NotFoundException, NotYetImplementedException, InternalServerException {
+			throws NotFoundException, NotYetImplementedException, InternalServerException, TraverseException {
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
 		final long userId = usersDao.getUserByUsername(principal.getName()).getId();
 		
@@ -91,24 +92,13 @@ public class GameRestController {
 			throw new NotFoundException("No game found for user");
 		}
 		
-		GameBoard board = null;
-		try {
-			board = new GameBoard(game);
-		} catch (IOException e) {
-			// TODO: some kind of log
-			throw new InternalServerException("Bad game state, please contact an admin");
-		}
+		GameBoard board = gameModelToGameBoard(game);
+		board.playerQuit(userId);
+		writeBoardToDatabase(board);
 		
-		// TODO: update the game state:
-		// if in progress other user wins
-		// if not started, remove user
-		// is there an ended state?
 		// TODO: auditing stuff
-
-		// TODO: remove
-		throw new NotYetImplementedException();
 		
-//		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	
@@ -131,22 +121,9 @@ public class GameRestController {
 			throw new BadRequestException("User already in a game");
 		}
 		
-		GameBoard board = null;
-		try {
-			board = new GameBoard(game);
-		} catch (IOException e) {
-			// TODO: some kind of log
-			throw new InternalServerException("Bad game state, please contact an admin");
-		}
-		
+		GameBoard board = gameModelToGameBoard(game);
 		board.registerPlayerTwo(userId);
-		
-		try {
-			gamesDao.updateGame(new GameModel(board));
-		} catch (JsonProcessingException e) {
-			// TODO: some kind of log
-			throw new InternalServerException("Bad game state, please contact an admin");
-		}
+		writeBoardToDatabase(board);
 		
 		// TODO: auditing stuff
 		// TODO: return the full game state
@@ -209,4 +186,23 @@ public class GameRestController {
 	// TODO: way to list the games
 	// TODO: way to get the move list for a given game
 	// TODO: way to get win-loss record for a given user
+
+	
+	private GameBoard gameModelToGameBoard(GameModel model) throws InternalServerException {
+		try {
+			return new GameBoard(model);
+		} catch (IOException e) {
+			// TODO: some kind of log
+			throw new InternalServerException("Bad game state, please contact an admin");
+		}
+	}
+
+	private void writeBoardToDatabase(GameBoard board) throws InternalServerException {
+		try {
+			gamesDao.updateGame(new GameModel(board));
+		} catch (JsonProcessingException e) {
+			// TODO: some kind of log
+			throw new InternalServerException("Bad game state, please contact an admin");
+		}
+	}
 }
