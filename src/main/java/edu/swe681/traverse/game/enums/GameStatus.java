@@ -21,5 +21,10 @@ public enum GameStatus {
 	/**
 	 * The state in which one player has forfeit
 	 */
-	FORFEIT;
+	FORFEIT,
+	/**
+	 * The state of a game in which one player enters and then quits. No wins or losses
+	 * are awarded.
+	 */
+	ENDED;
 }

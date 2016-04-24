@@ -114,7 +114,7 @@ public class GameBoardTests
 	@Test (expected=InvalidGameStateException.class)
 	public void RegisterInIllegalStateTest() throws TraverseException
 	{
-		board = board.forfeitGame(playerTwoID);
+		board = board.playerQuit(playerTwoID);
 		board.registerPlayerTwo(playerTwoID);
 	}
 	
@@ -141,7 +141,7 @@ public class GameBoardTests
 	@Test
 	public void LegalForfeitTest() throws TraverseException
 	{
-		board = board.forfeitGame(playerTwoID);
+		board = board.playerQuit(playerTwoID);
 		assertEquals(new GameState(GameStatus.FORFEIT, playerOneID),
 				board.getGameState());
 	}
@@ -150,13 +150,13 @@ public class GameBoardTests
 	public void IllegalForfeitStateTest() throws TraverseException
 	{
 		board = new GameBoard(gameID, playerOneID, false);
-		board.forfeitGame(playerTwoID);
+		board.playerQuit(playerTwoID);
 	}
 	
 	@Test (expected=InvalidGameInputException.class)
 	public void InvalidPlayerIDForfeitTest() throws TraverseException
 	{
-		board.forfeitGame(5L);
+		board.playerQuit(5L);
 	}
 		
 	@Test (expected=InvalidGameInputException.class)

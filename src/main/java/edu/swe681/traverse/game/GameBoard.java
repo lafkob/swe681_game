@@ -204,17 +204,25 @@ public final class GameBoard
 	}
 	
 	/**
-	 * Returns a new board in which the given player has
-	 * forfeit the game.
+	 * Returns a new board in which the given player has quit.
 	 * 
 	 * @param playerID The ID of the player that has forfeit
 	 * @return A new board with the new forfeit status
 	 */
-	public GameBoard forfeitGame(Long playerID) throws TraverseException
+	public GameBoard playerQuit(Long playerID) throws TraverseException
 	{
 		Long winningPlayerID;
 		GameBoard newBoard = new GameBoard(this);
 		
+		/* If the second player has not yet entered the game, set the game to ENDED.
+		 * The game will not count for or against the current player.*/
+		if (this.gameState.getStatus() == GameStatus.WAITING_FOR_PLAYER_TWO)
+		{
+			newBoard.gameState = gameState.updateStatus(GameStatus.ENDED);
+			return newBoard;
+		}
+		
+		/* Otherwise, the game can only be quit if it is still in play. */
 		if (this.gameState.getStatus() != GameStatus.PLAY)
 		{
 			throw new InvalidGameStateException("Players may not forfeit at this time.");
@@ -224,7 +232,7 @@ public final class GameBoard
 		{
 			winningPlayerID = playerTwoID;
 		}
-		if (playerID == playerTwoID)
+		else if (playerID == playerTwoID)
 		{
 			winningPlayerID = playerOneID;
 		}
@@ -371,9 +379,9 @@ public final class GameBoard
 		
 		if (gameState.getStatus() == GameStatus.WAITING_FOR_PLAYER_TWO)
 			throw new InvalidGameStateException("Cannot make move while waiting for players.");
-		if (gameState.getStatus() == GameStatus.WIN)
-			throw new InvalidGameStateException(String.format("Cannot make move. Player %d has won.",
-					gameState.getCurrentPlayerID()));
+		if (gameState.getStatus() == GameStatus.WIN || gameState.getStatus() == GameStatus.FORFEIT
+				|| gameState.getStatus() == GameStatus.ENDED)
+			throw new InvalidGameStateException("Cannot make move. The game has ended.");
 		
 		/* The piece must be between 0 and NUM_PIECES(16).*/
 		if (!(pieceID >= 0 && pieceID < Game.NUM_PIECES))
