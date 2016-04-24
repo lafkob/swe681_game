@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import edu.swe681.traverse.application.exception.BadRequestException;
+import edu.swe681.traverse.application.exception.InternalServerException;
 import edu.swe681.traverse.application.exception.NotFoundException;
 import edu.swe681.traverse.application.exception.NotYetImplementedException;
 import edu.swe681.traverse.rest.dto.response.MessageOnlyExceptionResponseDto;
@@ -59,6 +60,20 @@ public class GlobalExceptionHandlers {
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.NOT_FOUND)
 	public MessageOnlyExceptionResponseDto handleNotFoundException(Exception e) {
+		return new MessageOnlyExceptionResponseDto(e.getMessage());
+	}
+	
+	/**
+	 * Handler for exceptions that result in a 500 - Internal Server Error status with a
+	 * single string error message.
+	 * 
+	 * @param e
+	 * @return
+	 */
+	@ExceptionHandler({ InternalServerException.class })
+	@ResponseBody
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	public MessageOnlyExceptionResponseDto handleInternalServerException(Exception e) {
 		return new MessageOnlyExceptionResponseDto(e.getMessage());
 	}
 	

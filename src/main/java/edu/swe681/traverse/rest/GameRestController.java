@@ -1,5 +1,6 @@
 package edu.swe681.traverse.rest;
 
+import java.io.IOException;
 import java.security.Principal;
 
 import javax.validation.Valid;
@@ -14,8 +15,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.swe681.traverse.application.exception.BadRequestException;
+import edu.swe681.traverse.application.exception.InternalServerException;
 import edu.swe681.traverse.application.exception.NotFoundException;
 import edu.swe681.traverse.application.exception.NotYetImplementedException;
+import edu.swe681.traverse.game.GameBoard;
 import edu.swe681.traverse.model.GameModel;
 import edu.swe681.traverse.persistence.dao.GamesDao;
 import edu.swe681.traverse.persistence.dao.UsersDao;
@@ -69,11 +72,12 @@ public class GameRestController {
 	 * @return 200
 	 * @throws NotFoundException 
 	 * @throws NotYetImplementedException 
+	 * @throws InternalServerException 
 	 */
 	@RequestMapping(value="/quit", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<String> quitGame(@Valid @RequestBody GameRequestDto dto, Principal principal)
-			throws NotFoundException, NotYetImplementedException {
+			throws NotFoundException, NotYetImplementedException, InternalServerException {
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
 		final long userId = usersDao.getUserByUsername(principal.getName()).getId();
 		
@@ -82,6 +86,14 @@ public class GameRestController {
 		if (game == null || !game.isUserInGame(userId)) {
 			// TODO: audit this?
 			throw new NotFoundException("No game found for user");
+		}
+		
+		GameBoard board = null;
+		try {
+			board = new GameBoard(game);
+		} catch (IOException e) {
+			// TODO: some kind of log
+			throw new InternalServerException("Bad game state, please contact an admin");
 		}
 		
 		// TODO: update the game state:
