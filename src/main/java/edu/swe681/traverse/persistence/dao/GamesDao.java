@@ -41,7 +41,7 @@ public class GamesDao {
 			+ "P2_ONE_MOVE_AGO_X=?, P2_ONE_MOVE_AGO_Y=?, P2_TWO_MOVE_AGO_X=?, P2_TWO_MOVE_AGO_Y=?, P2_ONE_ID_AGO=?, P2_TWO_ID_AGO=? "
 			+ "WHERE ID = ?";
 	
-	private final static String PLAYER_GAME_COUNT = "SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND STATUS != ? AND STATUS != ?";
+	private final static String PLAYER_CURRENT_GAME_COUNT = "SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND (STATUS = ? OR STATUS = ?)";
 	private final static String PLAYER_WIN_COUNT = "SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID = ? AND (STATUS = ? OR STATUS = ?)";
 	private final static String PLAYER_LOSS_COUNT = "SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID != ? AND (STATUS = ? OR STATUS = ?)";
 	
@@ -63,8 +63,8 @@ public class GamesDao {
 	 * @return
 	 */
 	public boolean isPlayerCurrentlyInAGame(long userId) {
-		int gameCount = jdbcTemplate.queryForObject(PLAYER_GAME_COUNT, Integer.class, userId, userId,
-				GameStatus.WIN.toString(), GameStatus.FORFEIT.toString());
+		int gameCount = jdbcTemplate.queryForObject(PLAYER_CURRENT_GAME_COUNT, Integer.class, userId, userId,
+				GameStatus.PLAY.toString(), GameStatus.WAITING_FOR_PLAYER_TWO.toString());
 		return gameCount > 0;
 	}
 	
