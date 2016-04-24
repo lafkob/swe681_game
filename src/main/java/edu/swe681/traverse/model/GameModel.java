@@ -60,18 +60,50 @@ public class GameModel {
 		this.currentPlayerId = board.getGameState().getCurrentPlayerID();
 		
 		// p1MoveHistory
-		this.p1OneMoveAgoX = board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo().x;
-		this.p1OneMoveAgoY = board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo().y;
-		this.p1TwoMoveAgoX = board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo().x;
-		this.p1TwoMoveAgoY = board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo().y;
+		if (board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo() != null)
+		{
+			this.p1OneMoveAgoX = board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo().x;
+			this.p1OneMoveAgoY = board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo().y;
+		}
+		else
+		{
+			this.p1OneMoveAgoX = null;
+			this.p1OneMoveAgoY = null;
+		}
+		if (board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo() != null)
+		{
+			this.p1TwoMoveAgoX = board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo().x;
+			this.p1TwoMoveAgoY = board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo().y;
+		}
+		else
+		{
+			this.p1TwoMoveAgoX = null;
+			this.p1TwoMoveAgoY = null;
+		}
 		this.p1OneIdAgo = board.getMoveHistory(board.getPlayerOneID()).getOneIDAgo();
 		this.p1TwoIdAgo = board.getMoveHistory(board.getPlayerOneID()).getTwoIDAgo();
 		
 		// p2MoveHistory
-		this.p2OneMoveAgoX = board.getMoveHistory(board.getPlayerTwoID()).getOneMoveAgo().x;
-		this.p2OneMoveAgoY = board.getMoveHistory(board.getPlayerTwoID()).getOneMoveAgo().y;
-		this.p2TwoMoveAgoX = board.getMoveHistory(board.getPlayerTwoID()).getTwoMoveAgo().x;
-		this.p2TwoMoveAgoY = board.getMoveHistory(board.getPlayerTwoID()).getTwoMoveAgo().y;
+		if (board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo() != null)
+		{
+			this.p2OneMoveAgoX = board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo().x;
+			this.p2OneMoveAgoY = board.getMoveHistory(board.getPlayerOneID()).getOneMoveAgo().y;
+		}
+		else
+		{
+			this.p2OneMoveAgoX = null;
+			this.p2OneMoveAgoY = null;
+		}
+		if (board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo() != null)
+		{
+			this.p2TwoMoveAgoX = board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo().x;
+			this.p2TwoMoveAgoY = board.getMoveHistory(board.getPlayerOneID()).getTwoMoveAgo().y;
+		}
+		else
+		{
+			this.p2TwoMoveAgoX = null;
+			this.p2TwoMoveAgoY = null;
+		}
 		this.p2OneIdAgo = board.getMoveHistory(board.getPlayerTwoID()).getOneIDAgo();
 		this.p2TwoIdAgo = board.getMoveHistory(board.getPlayerTwoID()).getTwoIDAgo();
 	}

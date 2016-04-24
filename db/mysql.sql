@@ -21,11 +21,12 @@ CREATE TABLE `traverse`.`user_roles` (
   `ROLE` varchar(64) NOT NULL,
   PRIMARY KEY (`USER_ROLE_ID`),
   UNIQUE KEY `USERNAME_ROLE_UNIQUE` (`ROLE`,`USERNAME`),
-  KEY `FK_USERID_IDX` (`USERNAME`),
-  CONSTRAINT `FK_USERID`
+  KEY `FK_USERNAME_IDX` (`USERNAME`),
+  CONSTRAINT `FK_USERNAME`
   	FOREIGN KEY (`USERNAME`)
   	REFERENCES users (`USERNAME`)
-  	ON DELETE CASCADE);
+  	ON DELETE CASCADE
+  	ON UPDATE CASCADE);
   
 -----------------------------------------------------
 -- DDL for games table
@@ -72,18 +73,24 @@ CREATE TABLE `traverse`.`games` (
     ON UPDATE NO ACTION);
 
 -----------------------------------------------------
--- DDL for statistics table
+-- DDL for audit table
 -----------------------------------------------------
-CREATE TABLE `traverse`.`statistics` (
-  `ID` INT NOT NULL,
-  `WIN` INT NOT NULL,
-  `LOSS` INT NOT NULL,
-  `DRAW` INT NOT NULL,
+CREATE TABLE `traverse`.`audit` (
+  `ID` INT NOT NULL AUTO_INCREMENT,
+  `GAME_ID` INT NOT NULL,
+  `TIMESTAMP` TIMESTAMP NOT NULL,
+  `PLAYER_ID` INT NOT NULL,
+  `PIECE_ID` INT NOT NULL,
+  `MOVE` VARCHAR(128) NOT NULL,
   PRIMARY KEY (`ID`),
-  KEY `FK_USERID` (`ID`),
-  CONSTRAINT `FK_USERID`
-  	FOREIGN KEY (`ID`)
-  	REFERENCES `traverse`.`users` (`ID`),
-  	ON DELETE CASCADE);
-
-
+  INDEX `FK_GAME_ID_idx` (`GAME_ID` ASC),
+  CONSTRAINT `FK_GAME_ID`
+  	FOREIGN KEY (`GAME_ID`)
+  	REFERENCES `traverse`.`games` (`ID`)
+  	ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `FK_PLAYER_ID`
+  	FOREIGN KEY (`PLAYER_ID`)
+  	REFERENCES `traverse`.`users` (`ID`)
+  	ON DELETE NO ACTION
+    ON UPDATE NO ACTION);

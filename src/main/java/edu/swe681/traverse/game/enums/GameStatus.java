@@ -15,7 +15,16 @@ public enum GameStatus {
 	 */
 	PLAY,
 	/**
-	 * The state in which one player has one and no more move can be made
+	 * The state in which one player has won and no more move can be made
 	 */
-	WIN;
+	WIN,
+	/**
+	 * The state in which one player has forfeit
+	 */
+	FORFEIT,
+	/**
+	 * The state of a game in which one player enters and then quits. No wins or losses
+	 * are awarded.
+	 */
+	ENDED;
 }
