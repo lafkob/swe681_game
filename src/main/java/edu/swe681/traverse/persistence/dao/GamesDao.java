@@ -41,7 +41,10 @@ public class GamesDao {
 			+ "P2_ONE_MOVE_AGO_X=?, P2_ONE_MOVE_AGO_Y=?, P2_TWO_MOVE_AGO_X=?, P2_TWO_MOVE_AGO_Y=?, P2_ONE_ID_AGO=?, P2_TWO_ID_AGO=? "
 			+ "WHERE ID = ?";
 	
-	private final static String PLAYER_GAME_COUNT = "SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND STATUS != ?";
+	private final static String PLAYER_GAME_COUNT = "SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND STATUS != ? AND STATUS != ?";
+	private final static String PLAYER_WIN_COUNT = "SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID = ? AND (STATUS = ? OR STATUS = ?)";
+	private final static String PLAYER_LOSS_COUNT = "SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID != ? AND (STATUS = ? OR STATUS = ?)";
+	
 	
 	private final JdbcTemplate jdbcTemplate;
 	private final GamesRowMapper mapper;
@@ -60,7 +63,8 @@ public class GamesDao {
 	 * @return
 	 */
 	public boolean isPlayerCurrentlyInAGame(long userId) {
-		int gameCount = jdbcTemplate.queryForObject(PLAYER_GAME_COUNT, Integer.class, userId, userId, GameStatus.WIN.toString());
+		int gameCount = jdbcTemplate.queryForObject(PLAYER_GAME_COUNT, Integer.class, userId, userId,
+				GameStatus.WIN.toString(), GameStatus.FORFEIT.toString());
 		return gameCount > 0;
 	}
 	
@@ -100,6 +104,28 @@ public class GamesDao {
 				m.getP1OneMoveAgoX(), m.getP1OneMoveAgoY(), m.getP1TwoMoveAgoX(), m.getP1TwoMoveAgoY(), m.getP1OneIdAgo(), m.getP1TwoIdAgo(),
 				m.getP2OneMoveAgoX(), m.getP2OneMoveAgoY(), m.getP2TwoMoveAgoX(), m.getP2TwoMoveAgoY(), m.getP2OneIdAgo(), m.getP2TwoIdAgo(), 
 				m.getGameId());
+	}
+	
+	/**
+	 * Returns the number of wins the given user has
+	 * 
+	 * @param userId User to check
+	 * @return The number of win the given user has
+	 */
+	public int getUserWinCount(long userId) {
+		return jdbcTemplate.queryForObject(PLAYER_WIN_COUNT, Integer.class, userId, userId,
+				userId, GameStatus.WIN.toString(), GameStatus.FORFEIT.toString());
+	}
+	
+	/**
+	 * Returns the number of losses the given user has
+	 * 
+	 * @param userId User to check
+	 * @return The number of win the given user has
+	 */
+	public int getUserLossCount(long userId) {
+		return jdbcTemplate.queryForObject(PLAYER_LOSS_COUNT, Integer.class, userId, userId,
+				userId, GameStatus.WIN.toString(), GameStatus.FORFEIT.toString());
 	}
 	
 	// TODO: get all games with filters for: a given user id, a given status (to find open games)
