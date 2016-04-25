@@ -100,7 +100,6 @@ public class GlobalExceptionHandlers {
 		return new MessageOnlyExceptionResponseDto("An internal error has occurred, please contact admin");
 	}
 
-	// TODO: this handler should go away, as we will have everything implemented :)
 	/**
 	 * Handler for exceptions that result in a 501 - Not Implemented status with a
 	 * single string error message.
