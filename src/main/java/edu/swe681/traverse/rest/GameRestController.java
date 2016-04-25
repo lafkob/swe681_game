@@ -5,6 +5,8 @@ import java.security.Principal;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,7 @@ import edu.swe681.traverse.application.exception.NotYetImplementedException;
 import edu.swe681.traverse.game.GameBoard;
 import edu.swe681.traverse.game.exception.TraverseException;
 import edu.swe681.traverse.model.GameModel;
+import edu.swe681.traverse.persistence.dao.AuditDao;
 import edu.swe681.traverse.persistence.dao.GamesDao;
 import edu.swe681.traverse.persistence.dao.UsersDao;
 import edu.swe681.traverse.rest.dto.request.GameRequestDto;
@@ -38,12 +41,17 @@ import edu.swe681.traverse.rest.dto.response.GameStatusResponseDto;
 @RestController
 @RequestMapping(value="/api/game")
 public class GameRestController {
+
+	private static final Logger LOG = LoggerFactory.getLogger(GameRestController.class);
 	
 	@Autowired
 	private GamesDao gamesDao;
 	
 	@Autowired
 	private UsersDao usersDao;
+	
+	@Autowired
+	private AuditDao auditDao;
 	
 	/**
 	 * Starts a new game. Player will be the only player in the game.
@@ -56,7 +64,7 @@ public class GameRestController {
 	public GameResponseDto startNewGame(Principal principal) throws BadRequestException {
 		final long userId = usersDao.getUserByUsername(principal.getName()).getId();
 		if(gamesDao.isPlayerCurrentlyInAGame(userId)) {
-			// TODO: audit this?
+			LOG.info("Attempt to start a game while in a game. User: " + principal.getName());
 			throw new BadRequestException("User is already in a game.");
 		}
 		
@@ -88,7 +96,9 @@ public class GameRestController {
 		// make sure the user is in the game, don't give a specific error as
 		// to whether the game exists
 		if (game == null || !game.isUserInGame(userId)) {
-			// TODO: audit this?
+			LOG.info(
+					"Attempt to quit game that was either non-existent or in which the user is not a participant. User: "
+							+ principal.getName() + " GameID: " + dto.getGameId());
 			throw new NotFoundException("No game found for user");
 		}
 		
@@ -117,7 +127,8 @@ public class GameRestController {
 		
 		// make sure user is not already in a game
 		if (gamesDao.isPlayerCurrentlyInAGame(userId)) {
-			// TODO: audit this?
+			LOG.info("Attempt to join a game while in another game. User: " + principal.getName() + " GameID (join): "
+					+ dto.getGameId());
 			throw new BadRequestException("User already in a game");
 		}
 		
@@ -145,7 +156,8 @@ public class GameRestController {
 		// make sure the user is in the game, don't give a specific error as
 		// to whether the game exists
 		if (game == null || !game.isUserInGame(userId)) {
-			// TODO: audit this?
+			LOG.info("Attempt to get status for non-existent game or game in which user is not a participant. User: "
+					+ principal.getName() + " GameID: " + dto.getGameId());
 			throw new NotFoundException("No game found for user");
 		}
 		
@@ -170,7 +182,8 @@ public class GameRestController {
 		// make sure the user is in the game, don't give a specific error as
 		// to whether the game exists
 		if (game == null || !game.isUserInGame(userId)) {
-			// TODO: audit this?
+			LOG.info("Attempt to make a move for non-existent game or game in which user is not a participant. User: "
+					+ principal.getName() + " GameID: " + dto.getGameId());
 			throw new NotFoundException("No game found for user");
 		}
 		
@@ -192,7 +205,7 @@ public class GameRestController {
 		try {
 			return new GameBoard(model);
 		} catch (IOException e) {
-			// TODO: some kind of log
+			LOG.error("Error while converting GameModel to a GameBoard! GameID: " + model.getGameId(), e);
 			throw new InternalServerException("Bad game state, please contact an admin");
 		}
 	}
@@ -201,7 +214,7 @@ public class GameRestController {
 		try {
 			gamesDao.updateGame(new GameModel(board));
 		} catch (JsonProcessingException e) {
-			// TODO: some kind of log
+			LOG.error("Error while writing GameModel to the database! GameID: " + board.getGameID(), e);
 			throw new InternalServerException("Bad game state, please contact an admin");
 		}
 	}
