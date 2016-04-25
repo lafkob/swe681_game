@@ -24,7 +24,7 @@ public class AuditDao
 	private final String CREATE = "INSERT INTO audit (GAME_ID, TIMESTAMP, PLAYER_ID, "
 			+ "PIECE_ID, MOVE) VALUES (?, ?, ?, ?, ?)";
 	private final String FIND_BY_GAME_ID = "SELECT ID, GAME_ID, TIMESTAMP, PLAYER_ID, "
-			+ "PIECE_ID, MOVE FROM audit WHERE GAME_ID = ?";
+			+ "PIECE_ID, MOVE FROM audit WHERE GAME_ID = ? ORDER BY TIMESTAMP DESC";
 	
 	/*
 	 * private final static String ID_COL = "ID";
@@ -58,7 +58,7 @@ public class AuditDao
 	}
 	
 	/**
-	 * Maps a ResultSet row from the audit table to a AuditModel
+	 * Maps a ResultSet row from the audit table to an AuditModel
 	 */
 	private static class AuditRowMapper implements RowMapper<AuditModel>
 	{
