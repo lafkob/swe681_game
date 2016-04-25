@@ -1,6 +1,6 @@
 package edu.swe681.traverse.model;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * POJO to represent the audit log model
@@ -9,15 +9,15 @@ public class AuditModel implements Comparable<AuditModel>
 {
 	private long id;
 	private long gameId;
-	private Timestamp timeStamp;
-	private Long playerId;
-	private int pieceId;
+	private Date timeStamp;
+	private long playerId;
+	private Integer pieceId;
 	private String move;
 	
 	public AuditModel() {}
 	
-	public AuditModel(long id, long gameId, Timestamp timeStamp, Long playerId,
-			int pieceId, String move) {
+	public AuditModel(long id, long gameId, Date timeStamp, long playerId,
+			Integer pieceId, String move) {
 		super();
 		this.id = id;
 		this.gameId = gameId;
@@ -43,27 +43,27 @@ public class AuditModel implements Comparable<AuditModel>
 		this.gameId = gameId;
 	}
 
-	public Timestamp getTimeStamp() {
+	public Date getTimeStamp() {
 		return timeStamp;
 	}
 
-	public void setTimeStamp(Timestamp timeStamp) {
+	public void setTimeStamp(Date timeStamp) {
 		this.timeStamp = timeStamp;
 	}
 
-	public Long getPlayerId() {
+	public long getPlayerId() {
 		return playerId;
 	}
 
-	public void setPlayerId(Long playerId) {
+	public void setPlayerId(long playerId) {
 		this.playerId = playerId;
 	}
 
-	public int getPieceId() {
+	public Integer getPieceId() {
 		return pieceId;
 	}
 
-	public void setPieceId(int pieceId) {
+	public void setPieceId(Integer pieceId) {
 		this.pieceId = pieceId;
 	}
 
@@ -82,8 +82,8 @@ public class AuditModel implements Comparable<AuditModel>
 		result = prime * result + (int) (gameId ^ (gameId >>> 32));
 		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((move == null) ? 0 : move.hashCode());
-		result = prime * result + pieceId;
-		result = prime * result + ((playerId == null) ? 0 : playerId.hashCode());
+		result = prime * result + ((pieceId == null) ? 0 : pieceId.hashCode());
+		result = prime * result + (int) (playerId ^ (playerId >>> 32));
 		result = prime * result + ((timeStamp == null) ? 0 : timeStamp.hashCode());
 		return result;
 	}
@@ -106,12 +106,12 @@ public class AuditModel implements Comparable<AuditModel>
 				return false;
 		} else if (!move.equals(other.move))
 			return false;
-		if (pieceId != other.pieceId)
-			return false;
-		if (playerId == null) {
-			if (other.playerId != null)
+		if (pieceId == null) {
+			if (other.pieceId != null)
 				return false;
-		} else if (!playerId.equals(other.playerId))
+		} else if (!pieceId.equals(other.pieceId))
+			return false;
+		if (playerId != other.playerId)
 			return false;
 		if (timeStamp == null) {
 			if (other.timeStamp != null)
