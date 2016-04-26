@@ -1,9 +1,11 @@
 package edu.swe681.traverse.rest;
 
+import java.awt.Point;
 import java.io.IOException;
 import java.security.Principal;
-import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -23,13 +25,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.swe681.traverse.application.exception.BadRequestException;
 import edu.swe681.traverse.application.exception.InternalServerException;
 import edu.swe681.traverse.application.exception.NotFoundException;
-import edu.swe681.traverse.application.exception.NotYetImplementedException;
 import edu.swe681.traverse.game.GameBoard;
 import edu.swe681.traverse.game.exception.TraverseException;
 import edu.swe681.traverse.model.GameModel;
+import edu.swe681.traverse.model.UserModel;
 import edu.swe681.traverse.persistence.dao.AuditDao;
 import edu.swe681.traverse.persistence.dao.GamesDao;
 import edu.swe681.traverse.persistence.dao.UsersDao;
+import edu.swe681.traverse.rest.dto.Coordinate;
 import edu.swe681.traverse.rest.dto.request.GameRequestDto;
 import edu.swe681.traverse.rest.dto.request.JoinRequestDto;
 import edu.swe681.traverse.rest.dto.request.MoveRequestDto;
@@ -84,30 +87,22 @@ public class GameRestController {
 	 * @param dto Request containing the gameId
 	 * @return 200
 	 * @throws NotFoundException 
-	 * @throws NotYetImplementedException 
 	 * @throws InternalServerException 
 	 * @throws TraverseException 
 	 */
 	@RequestMapping(value="/quit", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<String> quitGame(@Valid @RequestBody GameRequestDto dto, Principal principal)
-			throws NotFoundException, NotYetImplementedException, InternalServerException, TraverseException {
+			throws NotFoundException, InternalServerException, TraverseException {
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
-		final long userId = usersDao.getUserByUsername(principal.getName()).getId();
+		final UserModel user = usersDao.getUserByUsername(principal.getName());
 		
-		// make sure the user is in the game, don't give a specific error as
-		// to whether the game exists
-		if (game == null || !game.isUserInGame(userId)) {
-			LOG.info(
-					"Attempt to quit game that was either non-existent or in which the user is not a participant. User: "
-							+ principal.getName() + " GameID: " + dto.getGameId());
-			throw new NotFoundException("No game found for user");
-		}
+		validateGameAndUserInGame(game, user, "/quit");
 		
 		GameBoard board = gameModelToGameBoard(game);
-		board.playerQuit(userId);
+		board.playerQuit(user.getId());
 		writeBoardToDatabase(board);
-		auditDao.addAuditLine(dto.getGameId(), new Date(), userId, null, principal.getName() + " quit game.");
+		auditDao.addAuditLine(dto.getGameId(), new Date(), user.getId(), null, principal.getName() + " quit game.");
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
@@ -116,7 +111,7 @@ public class GameRestController {
 	@RequestMapping(value="/join", method = RequestMethod.POST)
 	@ResponseBody
 	public GameStatusResponseDto joinGame(@Valid @RequestBody JoinRequestDto dto, Principal principal)
-			throws NotYetImplementedException, BadRequestException, NotFoundException, InternalServerException, TraverseException {
+			throws BadRequestException, NotFoundException, InternalServerException, TraverseException {
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
 		
 		if(game == null) {
@@ -137,11 +132,8 @@ public class GameRestController {
 		writeBoardToDatabase(board);
 		auditDao.addAuditLine(dto.getGameId(), new Date(), userId, null, principal.getName() + " joined game.");
 		
-		// TODO: return the full game state
-		
-		// TODO: remove
-		throw new NotYetImplementedException();
-//		return new GameStatusResponseDto(joinRequest.getGameId());
+		return new GameStatusResponseDto(dto.getGameId(), board.getBoard(), board.getGameState().getCurrentPlayerID(),
+				board.getPlayerOneID(), board.getPlayerTwoID(), board.getGameState().getStatus());
 	}
 
 
@@ -149,24 +141,21 @@ public class GameRestController {
 	@RequestMapping(value="/status", method = RequestMethod.POST)
 	@ResponseBody
 	public GameStatusResponseDto getStatus(@Valid @RequestBody StatusRequestDto dto, Principal principal)
-			throws NotYetImplementedException, NotFoundException {
+			throws NotFoundException, InternalServerException {
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
-		final long userId = usersDao.getUserByUsername(principal.getName()).getId();
+		final UserModel user = usersDao.getUserByUsername(principal.getName());
 		
-		// make sure the user is in the game, don't give a specific error as
-		// to whether the game exists
-		if (game == null || !game.isUserInGame(userId)) {
-			LOG.info("Attempt to get status for non-existent game or game in which user is not a participant. User: "
-					+ principal.getName() + " GameID: " + dto.getGameId());
-			throw new NotFoundException("No game found for user");
+		validateGameAndUserInGame(game, user, "/status");
+		
+		int[][] board;
+		try {
+			board = game.boardAsArray();
+		} catch (IOException e) {
+			LOG.error("Error while converting game board to array! GameID: " + game.getGameId(), e);
+			throw new InternalServerException("Bad game state, please contact an admin");
 		}
-		
-		// TODO: get the game state and populate it fully
-
-		// TODO: remove
-		throw new NotYetImplementedException();
-		
-//		return new GameStatusResponseDto(statusRequest.getGameId());
+		return new GameStatusResponseDto(dto.getGameId(), board, game.getCurrentPlayerId(),
+				game.getPlayerOneId(), game.getPlayerTwoId(), game.getGameStatus());
 	}
 	
 
@@ -174,31 +163,31 @@ public class GameRestController {
 	@RequestMapping(value="/move", method = RequestMethod.POST)
 	@ResponseBody
 	public GameStatusResponseDto makeMove(@Valid @RequestBody MoveRequestDto dto, Principal principal)
-			throws NotYetImplementedException, NotFoundException {
+			throws NotFoundException, InternalServerException, TraverseException, BadRequestException {
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
-		final long userId = usersDao.getUserByUsername(principal.getName()).getId();
+		final UserModel user = usersDao.getUserByUsername(principal.getName());
 		
-		// make sure the user is in the game, don't give a specific error as
-		// to whether the game exists
-		if (game == null || !game.isUserInGame(userId)) {
-			LOG.info("Attempt to make a move for non-existent game or game in which user is not a participant. User: "
-					+ principal.getName() + " GameID: " + dto.getGameId());
-			throw new NotFoundException("No game found for user");
+		validateGameAndUserInGame(game, user, "/move");
+		GameBoard board = gameModelToGameBoard(game);
+		
+		// make sure it is this players turn!
+		if(user.getId() != board.getGameState().getCurrentPlayerID()){
+			throw new BadRequestException("It is not the requested user's turn.");
 		}
 		
-		// TODO: update the game state, exceptions will be thrown and handled globally
-		// TODO: audit the call
-
-		// TODO: remove
-		throw new NotYetImplementedException();
+		board.movePiece(dto.getPieceId(), convertCoordinatesToPoints(dto.getMoves()));
+		writeBoardToDatabase(board);
+		auditDao.addAuditLine(dto.getGameId(), new Date(), user.getId(), dto.getPieceId(), coordinatesToString(dto.getMoves()));
 		
-//		return new GameStatusResponseDto(moveRequest.getGameId());
+		return new GameStatusResponseDto(dto.getGameId(), board.getBoard(), board.getGameState().getCurrentPlayerID(),
+				board.getPlayerOneID(), board.getPlayerTwoID(), board.getGameState().getStatus());
 	}
 	
 	// TODO: way to list the games
 	// TODO: way to get the move list for a given game
 	// TODO: way to get win-loss record for a given user
 
+	
 	
 	private GameBoard gameModelToGameBoard(GameModel model) throws InternalServerException {
 		try {
@@ -216,5 +205,55 @@ public class GameRestController {
 			LOG.error("Error while writing GameModel to the database! GameID: " + board.getGameID(), e);
 			throw new InternalServerException("Bad game state, please contact an admin");
 		}
+	}
+	
+	/**
+	 * Checks to ensure that the game is not null and the the given user is a participant in the game.
+	 * 
+	 * @param game Game to check
+	 * @param user User to check
+	 * @return True if the game is not null and the user is a participant in the game
+	 * @throws NotFoundException Vague exception with message about game not found if it is null or the user is not a participant
+	 */
+	private boolean validateGameAndUserInGame(GameModel game, UserModel user, String method) throws NotFoundException {
+		// make sure the user is in the game, don't give a specific error as
+		// to whether the game exists
+		if (game == null || !game.isUserInGame(user.getId())) {
+			LOG.info("Attempt to operate on non-existent game or game in which user is not a participant. User: "
+					+ user.getUsername() + " GameID: " + game.getGameId() + " Method: " + method);
+			throw new NotFoundException("No game found for user");
+		}
+		
+		return true;
+	}
+	
+	private List<Point> convertCoordinatesToPoints(List<Coordinate> coords) {
+		if(coords == null) return null;
+		
+		List<Point> points = new ArrayList<>(coords.size());
+		if(!coords.isEmpty()) {
+			for(Coordinate coord : coords) {
+				points.add(new Point(coord.getX(), coord.getY()));
+			}
+		}
+		return points;
+	}
+	
+	private String coordinatesToString(List<Coordinate> coords) {
+		if(coords == null) return null;
+		
+		// TODO: do we have a limit on the coordinates? the database can't take more than 128....
+		StringBuilder builder = new StringBuilder();
+		if(!coords.isEmpty()) {
+			// append the first one, no commas
+			builder.append("(").append(coords.get(0).getX()).append(",").append(coords.get(0).getY()).append(")");
+			
+			// append the rest, prefix with a comma
+			for(int i = 1; i < coords.size(); i++) {
+				builder.append(",(").append(coords.get(i).getX()).append(",").append(coords.get(i).getY()).append(")");
+			}
+		}
+		
+		return builder.toString();
 	}
 }
