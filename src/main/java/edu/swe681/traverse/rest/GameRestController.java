@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -63,10 +64,12 @@ public class GameRestController {
 	 * @param principal User's principal, Spring will auto populate this
 	 * @return Response with the new gameId
 	 * @throws BadRequestException
+	 * @throws InternalServerException 
 	 */
 	@RequestMapping(value="/start", method = RequestMethod.POST)
 	@ResponseBody
-	public GameResponseDto startNewGame(Principal principal) throws BadRequestException {
+	@Transactional
+	public GameResponseDto startNewGame(Principal principal) throws BadRequestException, InternalServerException {
 		final long userId = usersDao.getUserByUsername(principal.getName()).getId();
 		if(gamesDao.isPlayerCurrentlyInAGame(userId)) {
 			LOG.info("Attempt to start a game while in a game. User: " + principal.getName());
@@ -74,6 +77,10 @@ public class GameRestController {
 		}
 		
 		final long gameId = gamesDao.startNewGame(userId);
+		// update the board now by creating the object and then writing it,
+		// this will set all the initial internal states up properly!
+		GameBoard board = new GameBoard(gameId, userId, false);
+		writeBoardToDatabase(board);
 		auditDao.addAuditLine(gameId, new Date(), userId, null, principal.getName() + " started game.");
 		return new GameResponseDto(gameId);
 	}
@@ -93,6 +100,7 @@ public class GameRestController {
 	 */
 	@RequestMapping(value="/quit", method = RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	public ResponseEntity<String> quitGame(@Valid @RequestBody GameRequestDto dto, Principal principal)
 			throws NotFoundException, InternalServerException, TraverseException {
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
@@ -122,6 +130,7 @@ public class GameRestController {
 	 */
 	@RequestMapping(value="/join", method = RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	public GameStatusResponseDto joinGame(@Valid @RequestBody GameRequestDto dto, Principal principal)
 			throws BadRequestException, NotFoundException, InternalServerException, TraverseException {
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
@@ -194,6 +203,7 @@ public class GameRestController {
 	 */
 	@RequestMapping(value="/move", method = RequestMethod.POST)
 	@ResponseBody
+	@Transactional
 	public GameStatusResponseDto makeMove(@Valid @RequestBody MoveRequestDto dto, Principal principal)
 			throws NotFoundException, InternalServerException, TraverseException, BadRequestException {
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
