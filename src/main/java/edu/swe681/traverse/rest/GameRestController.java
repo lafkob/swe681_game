@@ -2,6 +2,8 @@ package edu.swe681.traverse.rest;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.sql.Timestamp;
+import java.util.Date;
 
 import javax.validation.Valid;
 
@@ -68,8 +70,8 @@ public class GameRestController {
 			throw new BadRequestException("User is already in a game.");
 		}
 		
-		// TODO: auditing stuff
 		final long gameId = gamesDao.startNewGame(userId);
+		auditDao.addAuditLine(gameId, new Date(), userId, null, principal.getName() + " started game.");
 		return new GameResponseDto(gameId);
 	}
 	
@@ -105,9 +107,7 @@ public class GameRestController {
 		GameBoard board = gameModelToGameBoard(game);
 		board.playerQuit(userId);
 		writeBoardToDatabase(board);
-		
-		// TODO: auditing stuff
-		
+		auditDao.addAuditLine(dto.getGameId(), new Date(), userId, null, principal.getName() + " quit game.");
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
@@ -135,8 +135,8 @@ public class GameRestController {
 		GameBoard board = gameModelToGameBoard(game);
 		board.registerPlayerTwo(userId);
 		writeBoardToDatabase(board);
+		auditDao.addAuditLine(dto.getGameId(), new Date(), userId, null, principal.getName() + " joined game.");
 		
-		// TODO: auditing stuff
 		// TODO: return the full game state
 		
 		// TODO: remove
@@ -162,7 +162,6 @@ public class GameRestController {
 		}
 		
 		// TODO: get the game state and populate it fully
-		// TODO: audit the call?
 
 		// TODO: remove
 		throw new NotYetImplementedException();
