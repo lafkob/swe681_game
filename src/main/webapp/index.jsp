@@ -10,6 +10,7 @@
 		// TODO: obviously these are just garbage controls to call the REST endpoints
 	%>
 	<input type="button" id="startBtn" value="Start a game" />
+	<input type="button" id="findBtn" value="Find Open Games" />
 	<br/><br/>
 	Game ID: <input id="gameId" /> 
 	<br/><br/>

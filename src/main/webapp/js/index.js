@@ -14,6 +14,21 @@ $(function() {
 		return false;
 	});
 	
+	$('#findBtn').click(function() {
+		reqData = {};
+		$.ajax({
+			type : "POST",
+			url : "./api/info/open-games",
+			data : JSON.stringify(reqData),
+			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
+			success : utils.jsonSuccessHandler,
+			error: utils.requestErrorHandler,
+			dataType : 'json',
+			contentType: 'application/json'
+		});
+		return false;
+	});
+	
 	$('#joinBtn').click(function() {
 		reqData = {};
 		reqData.gameId = $("#gameId").val();
