@@ -34,9 +34,7 @@ import edu.swe681.traverse.persistence.dao.GamesDao;
 import edu.swe681.traverse.persistence.dao.UsersDao;
 import edu.swe681.traverse.rest.dto.Coordinate;
 import edu.swe681.traverse.rest.dto.request.GameRequestDto;
-import edu.swe681.traverse.rest.dto.request.JoinRequestDto;
 import edu.swe681.traverse.rest.dto.request.MoveRequestDto;
-import edu.swe681.traverse.rest.dto.request.StatusRequestDto;
 import edu.swe681.traverse.rest.dto.response.GameResponseDto;
 import edu.swe681.traverse.rest.dto.response.GameStatusResponseDto;
 
@@ -59,10 +57,12 @@ public class GameRestController {
 	private AuditDao auditDao;
 	
 	/**
-	 * Starts a new game. Player will be the only player in the game.
+	 * Starts a new game. Player will be the only player in the game. Player
+	 * must not already be in another active game.
 	 * 
+	 * @param principal User's principal, Spring will auto populate this
 	 * @return Response with the new gameId
-	 * @throws BadRequestException 
+	 * @throws BadRequestException
 	 */
 	@RequestMapping(value="/start", method = RequestMethod.POST)
 	@ResponseBody
@@ -85,6 +85,7 @@ public class GameRestController {
 	 * game that is waiting to start.
 	 * 
 	 * @param dto Request containing the gameId
+	 * @param principal User's principal, Spring will auto populate this
 	 * @return 200
 	 * @throws NotFoundException 
 	 * @throws InternalServerException 
@@ -107,10 +108,21 @@ public class GameRestController {
 	}
 	
 	
-	// TODO: document
+	/**
+	 * Joins a player to a game specified by the gameId. The game must exist and
+	 * the player not already be in a game. Will trigger the game to start.
+	 * 
+	 * @param dto Request containing the gameId
+	 * @param principal User's principal, Spring will auto populate this
+	 * @return 200 with a GameStatusResponse JSON object
+	 * @throws BadRequestException
+	 * @throws NotFoundException
+	 * @throws InternalServerException
+	 * @throws TraverseException
+	 */
 	@RequestMapping(value="/join", method = RequestMethod.POST)
 	@ResponseBody
-	public GameStatusResponseDto joinGame(@Valid @RequestBody JoinRequestDto dto, Principal principal)
+	public GameStatusResponseDto joinGame(@Valid @RequestBody GameRequestDto dto, Principal principal)
 			throws BadRequestException, NotFoundException, InternalServerException, TraverseException {
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
 		
@@ -136,11 +148,19 @@ public class GameRestController {
 				board.getPlayerOneID(), board.getPlayerTwoID(), board.getGameState().getStatus());
 	}
 
-
-	// TODO: document
+	/**
+	 * Gets the status of the game specified by the gameId. Game must exist and 
+	 * the requesting player must be a participant in the game.
+	 * 
+	 * @param dto Request containing the gameId
+	 * @param principal User's principal, Spring will auto populate this
+	 * @return 200 with a GameStatusResponse JSON object
+	 * @throws NotFoundException
+	 * @throws InternalServerException
+	 */
 	@RequestMapping(value="/status", method = RequestMethod.POST)
 	@ResponseBody
-	public GameStatusResponseDto getStatus(@Valid @RequestBody StatusRequestDto dto, Principal principal)
+	public GameStatusResponseDto getStatus(@Valid @RequestBody GameRequestDto dto, Principal principal)
 			throws NotFoundException, InternalServerException {
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
 		final UserModel user = usersDao.getUserByUsername(principal.getName());
@@ -159,7 +179,19 @@ public class GameRestController {
 	}
 	
 
-	// TODO: document
+	/**
+	 * Moves a piece on a game. Game must exist and the requesting player must
+	 * be a participant in the game. It must be the player's turn. Move must be
+	 * valid by the rules of traverse.
+	 * 
+	 * @param dto Request containing the gameId
+	 * @param principal User's principal, Spring will auto populate this
+	 * @return 200 with a GameStatusResponse JSON object
+	 * @throws NotFoundException
+	 * @throws InternalServerException
+	 * @throws TraverseException
+	 * @throws BadRequestException
+	 */
 	@RequestMapping(value="/move", method = RequestMethod.POST)
 	@ResponseBody
 	public GameStatusResponseDto makeMove(@Valid @RequestBody MoveRequestDto dto, Principal principal)
@@ -188,7 +220,13 @@ public class GameRestController {
 	// TODO: way to get win-loss record for a given user
 
 	
-	
+	/**
+	 * Wraps the logic for converting a GameModel to a GameBoard, including the exception handling.
+	 * 
+	 * @param model GameModel to convert
+	 * @return Converted GameBoard
+	 * @throws InternalServerException Serde issues with the int[][] board
+	 */
 	private GameBoard gameModelToGameBoard(GameModel model) throws InternalServerException {
 		try {
 			return new GameBoard(model);
@@ -198,6 +236,13 @@ public class GameRestController {
 		}
 	}
 
+	/**
+	 * Wraps the logic for writing a GameBoard into the database, including the
+	 * conversion to a GameModel and exception handling.
+	 * 
+	 * @param board GameBoard to write to the database
+	 * @throws InternalServerException Serde issues with the int[][] board
+	 */
 	private void writeBoardToDatabase(GameBoard board) throws InternalServerException {
 		try {
 			gamesDao.updateGame(new GameModel(board));
@@ -227,6 +272,13 @@ public class GameRestController {
 		return true;
 	}
 	
+	/**
+	 * Converter from Coordinate model objects into the Point objects used by
+	 * the GameBoard.
+	 * 
+	 * @param coords Coordinate objects to convert
+	 * @return Point objects or null if coords is null
+	 */
 	private List<Point> convertCoordinatesToPoints(List<Coordinate> coords) {
 		if(coords == null) return null;
 		
@@ -239,6 +291,12 @@ public class GameRestController {
 		return points;
 	}
 	
+	/**
+	 * Converts a list of Coordinates into a string suitable for auditing moves.
+	 * 
+	 * @param coords Coordinate objects to convert
+	 * @return String representation of the objects or null if coords is null
+	 */
 	private String coordinatesToString(List<Coordinate> coords) {
 		if(coords == null) return null;
 		
