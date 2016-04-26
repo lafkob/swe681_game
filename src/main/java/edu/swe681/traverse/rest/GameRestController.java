@@ -109,7 +109,7 @@ public class GameRestController {
 		validateGameAndUserInGame(game, user, "/quit");
 		
 		GameBoard board = gameModelToGameBoard(game);
-		board.playerQuit(user.getId());
+		board = board.playerQuit(user.getId());
 		writeBoardToDatabase(board);
 		auditDao.addAuditLine(dto.getGameId(), new Date(), user.getId(), null, principal.getName() + " quit game.");
 		return new ResponseEntity<>(HttpStatus.OK);
@@ -149,7 +149,7 @@ public class GameRestController {
 		}
 		
 		GameBoard board = gameModelToGameBoard(game);
-		board.registerPlayerTwo(userId);
+		board = board.registerPlayerTwo(userId);
 		writeBoardToDatabase(board);
 		auditDao.addAuditLine(dto.getGameId(), new Date(), userId, null, principal.getName() + " joined game.");
 		
@@ -217,7 +217,7 @@ public class GameRestController {
 			throw new BadRequestException("It is not the requested user's turn.");
 		}
 		
-		board.movePiece(dto.getPieceId(), convertCoordinatesToPoints(dto.getMoves()));
+		board = board.movePiece(dto.getPieceId(), convertCoordinatesToPoints(dto.getMoves()));
 		writeBoardToDatabase(board);
 		auditDao.addAuditLine(dto.getGameId(), new Date(), user.getId(), dto.getPieceId(), coordinatesToString(dto.getMoves()));
 		
