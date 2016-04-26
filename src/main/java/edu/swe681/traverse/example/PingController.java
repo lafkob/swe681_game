@@ -17,8 +17,6 @@ public class PingController {
 	@ResponseBody
 	public String ping(){
 		LOG.debug("Executed ping.");
-		LOG.info("This is a {}", "test");
-		
 		return "System up";
 	}
 }
