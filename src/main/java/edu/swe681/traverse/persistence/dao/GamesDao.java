@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import edu.swe681.traverse.game.enums.GameStatus;
 import edu.swe681.traverse.model.GameModel;
+import edu.swe681.traverse.rest.dto.response.UserInfoListResponseDto.UserInfoResponseDto;
 import edu.swe681.traverse.utils.DaoUtils;
 
 /**
@@ -50,24 +51,42 @@ public class GamesDao {
 			"SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND " + RUNNING_GAME_FILTER;
 	
 	private final static String PLAYER_WIN_COUNT = 
-			"SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID = ? AND " + FINISHED_GAME_FILTER;
+			"SELECT COUNT(*) as WINS FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID = ? AND " + FINISHED_GAME_FILTER;
 	
 	private final static String PLAYER_LOSS_COUNT = 
-			"SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID != ? AND " + FINISHED_GAME_FILTER;
+			"SELECT COUNT(*) as LOSSES FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID != ? AND " + FINISHED_GAME_FILTER;
 	
 	
 	private final static String OPEN_GAME_IDS = "SELECT ID FROM GAMES WHERE STATUS = '" + GameStatus.WAITING_FOR_PLAYER_TWO + "'";
 	private final static String FINISHED_GAME_IDS = "SELECT ID FROM GAMES WHERE " + FINISHED_GAME_FILTER;
 	
+	/**
+	 * Makes heavy reuse of other query building blocks, requires 6 string parameters, all the same value: "usr.ID"
+	 * 
+	 * We want:
+	 * SELECT usr.username, 
+	 * (SELECT COUNT(*) as WINS 
+	 * 		FROM GAMES 
+	 * 		WHERE (PLAYER1_ID = usr.ID OR PLAYER2_ID = usr.ID) AND CURRENT_PLAYER_ID = usr.ID AND (STATUS = 'WIN' OR STATUS='FORFEIT')) as WINS, 
+	 * (SELECT COUNT(*) as LOSSES 
+	 * 		FROM GAMES 
+	 * 		WHERE (PLAYER1_ID = usr.ID OR PLAYER2_ID = usr.ID) AND CURRENT_PLAYER_ID != usr.ID AND (STATUS = 'WIN' OR STATUS='FORFEIT')) as LOSSES 
+	 * FROM USERS usr;
+	 */
+	private final static String SELECT_USER_INFO = 
+			"SELECT usr.username, (" + PLAYER_WIN_COUNT + ") as WINS, (" + PLAYER_LOSS_COUNT + ") as LOSSES FROM USERS usr";
+	
 	
 	private final JdbcTemplate jdbcTemplate;
-	private final GamesRowMapper mapper;
+	private final GamesRowMapper gameMapper;
+	private final UserInfoMapper userInfoMapper;
 	
 	@Autowired
 	public GamesDao(DataSource datasource) {
 		Objects.requireNonNull(datasource, "dataSource required");
 		this.jdbcTemplate = new JdbcTemplate(datasource);
-		mapper = new GamesRowMapper();
+		gameMapper = new GamesRowMapper();
+		userInfoMapper = new UserInfoMapper();
 	}
 	
 	/**
@@ -102,7 +121,7 @@ public class GamesDao {
 	 * @return GameModel representing the row
 	 */
 	public GameModel getGameById(long gameId) {
-		List<GameModel> matches = jdbcTemplate.query(FIND_BY_ID, mapper, gameId);
+		List<GameModel> matches = jdbcTemplate.query(FIND_BY_ID, gameMapper, gameId);
 		if(matches.size() == 0) return null;
 		else return matches.get(0); // shouldn't be finding more than one for a game id!
 	}
@@ -120,23 +139,15 @@ public class GamesDao {
 	}
 	
 	/**
-	 * Returns the number of wins the given user has
+	 * Returns the info for all users in the system: username + W-L record
 	 * 
-	 * @param userId User to check
-	 * @return The number of win the given user has
+	 * @return UserInfoResponseDto objects for all users
 	 */
-	public int getUserWinCount(long userId) {
-		return jdbcTemplate.queryForObject(PLAYER_WIN_COUNT, Integer.class, userId, userId, userId);
-	}
-	
-	/**
-	 * Returns the number of losses the given user has
-	 * 
-	 * @param userId User to check
-	 * @return The number of win the given user has
-	 */
-	public int getUserLossCount(long userId) {
-		return jdbcTemplate.queryForObject(PLAYER_LOSS_COUNT, Integer.class, userId, userId);
+	public List<UserInfoResponseDto> getAllUserInfo() {
+		// since this query heavily reuses other building blocks, we have to stick these in all parameters
+		// so that the joins are done properly
+		Object[] params = {"usr.ID", "usr.ID", "usr.ID", "usr.ID", "usr.ID", "usr.ID"};
+		return jdbcTemplate.query(SELECT_USER_INFO, userInfoMapper, params);
 	}
 	
 	/**
@@ -156,8 +167,6 @@ public class GamesDao {
 	public List<Long> getFinishedGameIds() {
 		return jdbcTemplate.queryForList(FINISHED_GAME_IDS, Long.class);
 	}
-	
-	// TODO: get all games with filters for: a given user id, a given status (to find open games)
 	
 	/**
 	 * Maps a ResultSet row from the games table to a GameModel
@@ -206,6 +215,22 @@ public class GamesDao {
 			model.setP2TwoIdAgo(DaoUtils.getInteger(rs, P2_TWO_ID_AGO_COL));
 			
 			return model;
+		}
+		
+	}
+	
+	/**
+	 * Maps a ResultSet row directly to a UserInfoResponseDto
+	 */
+	private static class UserInfoMapper implements RowMapper<UserInfoResponseDto> {
+
+		private final static String USERNAME_COL = "USERNAME";
+		private final static String WINS_COL = "WINS";
+		private final static String LOSSES_COL = "LOSSES";
+
+		@Override
+		public UserInfoResponseDto mapRow(ResultSet rs, int rowNum) throws SQLException {
+			return new UserInfoResponseDto(rs.getString(USERNAME_COL), DaoUtils.getInteger(rs, WINS_COL), DaoUtils.getInteger(rs, LOSSES_COL));
 		}
 		
 	}

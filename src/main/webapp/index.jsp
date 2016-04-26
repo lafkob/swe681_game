@@ -14,6 +14,8 @@
 		<input type="button" id="pingBtn" value="Ping server" />
 		<input type="submit" id="logoutBtn" value="Log out" /> <input type="hidden"
 			id="_csrf_token" name="${_csrf.parameterName}" value="${_csrf.token}" />
+		<br/>
+		<input type="button" id="userInfoBtn" value="Get User Stats" />
 	</form>
 	<hr>
 	<h4>Game Options:</h4>

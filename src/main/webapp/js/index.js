@@ -33,7 +33,22 @@ $(function() {
 		reqData = {};
 		$.ajax({
 			type : "POST",
-			url : "./api/info/open-games",
+			url : "./api/info/finished-games",
+			data : JSON.stringify(reqData),
+			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
+			success : utils.jsonSuccessHandler,
+			error: utils.requestErrorHandler,
+			dataType : 'json',
+			contentType: 'application/json'
+		});
+		return false;
+	});
+	
+	$('#userInfoBtn').click(function() {
+		reqData = {};
+		$.ajax({
+			type : "POST",
+			url : "./api/info/users",
 			data : JSON.stringify(reqData),
 			headers: {'X-CSRF-TOKEN': $("input#_csrf_token").val()},
 			success : utils.jsonSuccessHandler,
