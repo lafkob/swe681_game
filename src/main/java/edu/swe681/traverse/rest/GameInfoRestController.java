@@ -26,12 +26,19 @@ public class GameInfoRestController {
 	
 	@RequestMapping(value="/open-games", method = RequestMethod.POST)
 	@ResponseBody
-	public GameListResponseDto listStartedGames() {
+	public GameListResponseDto listOpenGames() {
 		return new GameListResponseDto(gamesDao.getOpenGameIds());
 	}
 	
-
+	@RequestMapping(value="/finished-games", method = RequestMethod.POST)
+	@ResponseBody
+	public GameListResponseDto listFinishedGames() {
+		return new GameListResponseDto(gamesDao.getFinishedGameIds());
+	}
 	
+	
+	
+
 	// TODO: way to list the games
 	// TODO: way to get the audit list for a given game
 	// TODO: way to get win-loss record for a given user
