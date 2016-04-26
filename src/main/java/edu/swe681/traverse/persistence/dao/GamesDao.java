@@ -41,9 +41,22 @@ public class GamesDao {
 			+ "P2_ONE_MOVE_AGO_X=?, P2_ONE_MOVE_AGO_Y=?, P2_TWO_MOVE_AGO_X=?, P2_TWO_MOVE_AGO_Y=?, P2_ONE_ID_AGO=?, P2_TWO_ID_AGO=? "
 			+ "WHERE ID = ?";
 	
-	private final static String PLAYER_CURRENT_GAME_COUNT = "SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND (STATUS = ? OR STATUS = ?)";
-	private final static String PLAYER_WIN_COUNT = "SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID = ? AND (STATUS = ? OR STATUS = ?)";
-	private final static String PLAYER_LOSS_COUNT = "SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID != ? AND (STATUS = ? OR STATUS = ?)";
+	// some building blocks for queries
+	private final static String RUNNING_GAME_FILTER = "(STATUS = '" + GameStatus.WAITING_FOR_PLAYER_TWO + "' OR STATUS = '" + GameStatus.PLAY + "')";
+	private final static String FINISHED_GAME_FILTER = "(STATUS = '" + GameStatus.WIN + "' OR STATUS = '" + GameStatus.FORFEIT + "')";
+	
+	
+	private final static String PLAYER_CURRENT_GAME_COUNT = 
+			"SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND " + RUNNING_GAME_FILTER;
+	
+	private final static String PLAYER_WIN_COUNT = 
+			"SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID = ? AND " + FINISHED_GAME_FILTER;
+	
+	private final static String PLAYER_LOSS_COUNT = 
+			"SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID != ? AND " + FINISHED_GAME_FILTER;
+	
+	
+	private final static String OPEN_GAME_IDS = "SELECT ID FROM GAMES WHERE STATUS = '" + GameStatus.WAITING_FOR_PLAYER_TWO + "'";
 	
 	
 	private final JdbcTemplate jdbcTemplate;
@@ -63,8 +76,7 @@ public class GamesDao {
 	 * @return
 	 */
 	public boolean isPlayerCurrentlyInAGame(long userId) {
-		int gameCount = jdbcTemplate.queryForObject(PLAYER_CURRENT_GAME_COUNT, Integer.class, userId, userId,
-				GameStatus.PLAY.toString(), GameStatus.WAITING_FOR_PLAYER_TWO.toString());
+		int gameCount = jdbcTemplate.queryForObject(PLAYER_CURRENT_GAME_COUNT, Integer.class, userId, userId);
 		return gameCount > 0;
 	}
 	
@@ -113,8 +125,7 @@ public class GamesDao {
 	 * @return The number of win the given user has
 	 */
 	public int getUserWinCount(long userId) {
-		return jdbcTemplate.queryForObject(PLAYER_WIN_COUNT, Integer.class, userId, userId,
-				userId, GameStatus.WIN.toString(), GameStatus.FORFEIT.toString());
+		return jdbcTemplate.queryForObject(PLAYER_WIN_COUNT, Integer.class, userId, userId, userId);
 	}
 	
 	/**
@@ -124,8 +135,16 @@ public class GamesDao {
 	 * @return The number of win the given user has
 	 */
 	public int getUserLossCount(long userId) {
-		return jdbcTemplate.queryForObject(PLAYER_LOSS_COUNT, Integer.class, userId, userId,
-				userId, GameStatus.WIN.toString(), GameStatus.FORFEIT.toString());
+		return jdbcTemplate.queryForObject(PLAYER_LOSS_COUNT, Integer.class, userId, userId);
+	}
+	
+	/**
+	 * Gets the list of game ids in which there is only one player, waiting for a second player to join.
+	 * 
+	 * @return List of game ids
+	 */
+	public List<Long> getOpenGameIds() {
+		return jdbcTemplate.queryForList(OPEN_GAME_IDS, Long.class);
 	}
 	
 	// TODO: get all games with filters for: a given user id, a given status (to find open games)
