@@ -79,7 +79,7 @@ public class GameRestController {
 		final long gameId = gamesDao.startNewGame(userId);
 		// update the board now by creating the object and then writing it,
 		// this will set all the initial internal states up properly!
-		GameBoard board = new GameBoard(gameId, userId, false);
+		GameBoard board = new GameBoard(gameId, userId, true);
 		writeBoardToDatabase(board);
 		auditDao.addAuditLine(gameId, new Date(), userId, null, principal.getName() + " started game.");
 		return new GameResponseDto(gameId);
@@ -224,10 +224,6 @@ public class GameRestController {
 		return new GameStatusResponseDto(dto.getGameId(), board.getBoard(), board.getGameState().getCurrentPlayerID(),
 				board.getPlayerOneID(), board.getPlayerTwoID(), board.getGameState().getStatus());
 	}
-	
-	// TODO: way to list the games
-	// TODO: way to get the move list for a given game
-	// TODO: way to get win-loss record for a given user
 
 	
 	/**
@@ -273,13 +269,8 @@ public class GameRestController {
 	private boolean validateGameAndUserInGame(GameModel game, UserModel user, String method) throws NotFoundException {
 		// make sure the user is in the game, don't give a specific error as
 		// to whether the game exists
-		String gameIdStr;
-		
 		if (game == null || !game.isUserInGame(user.getId())) {
-			if (game == null)
-				gameIdStr = "null";
-			else
-				gameIdStr = game.getGameId() + "";
+			String gameIdStr = game == null ? "null" : Long.toString(game.getGameId());
 			
 			LOG.info("Attempt to operate on non-existent game or game in which user is not a participant. User: "
 					+ user.getUsername() + " GameID: " + gameIdStr + " Method: " + method);
