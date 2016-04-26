@@ -273,9 +273,16 @@ public class GameRestController {
 	private boolean validateGameAndUserInGame(GameModel game, UserModel user, String method) throws NotFoundException {
 		// make sure the user is in the game, don't give a specific error as
 		// to whether the game exists
+		String gameIdStr;
+		
 		if (game == null || !game.isUserInGame(user.getId())) {
+			if (game == null)
+				gameIdStr = "null";
+			else
+				gameIdStr = game.getGameId() + "";
+			
 			LOG.info("Attempt to operate on non-existent game or game in which user is not a participant. User: "
-					+ user.getUsername() + " GameID: " + game.getGameId() + " Method: " + method);
+					+ user.getUsername() + " GameID: " + gameIdStr + " Method: " + method);
 			throw new NotFoundException("No game found for user");
 		}
 		

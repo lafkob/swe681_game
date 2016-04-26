@@ -712,7 +712,7 @@ public class GameBoardTests
 	{
 		GameBoard newBoard;
 		
-		if (board.getGameState().getCurrentPlayerID() == board.getPlayerOneID())
+		if (board.getPlayerOneID().equals(board.getGameState().getCurrentPlayerID()))
 		{
 			newBoard = parseAndMakeMove(board, String.format("0,%d 1", genericMoveNum+1));
 			genericMoveNum++;

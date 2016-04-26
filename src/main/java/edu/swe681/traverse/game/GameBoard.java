@@ -20,6 +20,7 @@ import edu.swe681.traverse.model.GameModel;
  * is a piece in the current player's row that can move, the player
  * must move a piece from their row.
  * - A player may not backtrack to the same destination (with the same piece) on their next turn 
+ * - A player is limited to 10 jumps in one turn.
  */
 public final class GameBoard
 {
@@ -28,6 +29,7 @@ public final class GameBoard
 	 * to the checks. */
 	public static final int SIZE = 10;
 	private static final int EMPTY = -1;
+	private static final int MOVE_LIMIT = 10;
 	private static final int STARTING_ROW_P1 = 0;
 	private static final int STARTING_ROW_P2 = SIZE - 1;
 	/* Note: Though these players are not in use, their starting lines are on the
@@ -123,7 +125,6 @@ public final class GameBoard
 	/**
 	 * Requires: IDs must not be negative, no values can be null, except board,
 	 * but only if you plan to add a new board immediately
-	 * TODO: I really want to make this private, but it makes testing odd
 	 * Constructor creates a new GameBoard with the given board
 	 * 
 	 * @param gameID GameID for the board
@@ -228,11 +229,11 @@ public final class GameBoard
 			throw new InvalidGameStateException("Players may not forfeit at this time.");
 		}
 		
-		if (playerID == playerOneID)
+		if (playerOneID.equals(playerID))
 		{
 			winningPlayerID = playerTwoID;
 		}
-		else if (playerID == playerTwoID)
+		else if (playerTwoID.equals(playerID))
 		{
 			winningPlayerID = playerOneID;
 		}
@@ -296,7 +297,7 @@ public final class GameBoard
 	{
 		if (!(pieceID >= 0 && pieceID < Game.NUM_PIECES))
 		{
-			throw new InvalidGameInputException("PieceID must be between 1 and 15.");
+			throw new InvalidGameInputException("The given piece ID must be between 1 and 15.");
 		}
 		
 		for (int row = 0; row < SIZE; row++)
@@ -339,7 +340,7 @@ public final class GameBoard
 	 */
 	public MoveHistory getMoveHistory(Long playerID)
 	{
-		if (playerID == playerOneID)
+		if (playerOneID.equals(playerID))
 			return p1History;
 		else
 			return p2History;
@@ -353,7 +354,7 @@ public final class GameBoard
 	 */
 	private void advanceTurn()
 	{
-		if (gameState.getCurrentPlayerID() == playerOneID)
+		if (playerOneID.equals(gameState.getCurrentPlayerID()))
 			gameState = gameState.updatePlayer(playerTwoID);
 		else
 			gameState = gameState.updatePlayer(playerOneID);
@@ -383,13 +384,6 @@ public final class GameBoard
 				|| gameState.getStatus() == GameStatus.ENDED)
 			throw new InvalidGameStateException("Cannot make move. The game has ended.");
 		
-		/* The piece must be between 0 and NUM_PIECES(16).*/
-		if (!(pieceID >= 0 && pieceID < Game.NUM_PIECES))
-		{
-			throw new InvalidGameInputException(String.format("The given piece ID (%d) is "
-				+ "invalid.", pieceID));
-		}
-		
 		newBoard = new GameBoard(this);
 		start = getPieceLocation(pieceID);
 		newBoard.jumpMade = false;
@@ -418,7 +412,7 @@ public final class GameBoard
 				throw new IllegalMultiMoveException("", midway, dest);
 			}
 			
-			newBoard.validatePlayMove(pieceID, midway, dest);
+			newBoard.validateMove(pieceID, midway, dest);
 			
 			newBoard.board[dest.x][dest.y] = newBoard.board[midway.x][midway.y];
 			newBoard.board[midway.x][midway.y] = EMPTY;
@@ -459,10 +453,16 @@ public final class GameBoard
 			throw new InvalidGameInputException("Moves are incomplete. No destinations provided.");
 		}
 		
+		/* There are too many destinations.*/
+		if (dests.size() > MOVE_LIMIT)
+		{
+			throw new InvalidGameInputException("Too many moves requested. The limit is 20.");
+		}
+		
 		/* That is not the player's piece */
 		GamePiece piece = Game.PIECES[pieceID];
 		Player currentPlayer;
-		if (gameState.getCurrentPlayerID() == playerOneID)
+		if (playerOneID.equals(gameState.getCurrentPlayerID()))
 			currentPlayer = Player.ONE;
 		else
 			currentPlayer = Player.TWO;
@@ -513,7 +513,7 @@ public final class GameBoard
 	 * 
 	 * @throws TraverseException If the move is illegal
 	 */
-	private void validatePlayMove(int pieceID, Point start, Point dest)
+	private void validateMove(int pieceID, Point start, Point dest)
 		throws TraverseException
 	{
 		GamePiece piece;
@@ -650,7 +650,7 @@ public final class GameBoard
 	 */
 	public boolean playerHasWon(Long playerID)
 	{
-		if (playerID == playerOneID)
+		if (playerOneID.equals(playerID))
 		{
 			for (int col = 1; col < SIZE-1; col++)
 			{
@@ -719,7 +719,7 @@ public final class GameBoard
 	 */
 	private boolean otherMovesAreAvailable(int excludedPieceID) throws TraverseException
 	{
-		if (gameState.getCurrentPlayerID() == playerOneID)
+		if (playerOneID.equals(gameState.getCurrentPlayerID()))
 		{
 			for (int i = 0; i < 8; i++)
 			{
@@ -788,7 +788,7 @@ public final class GameBoard
 						try
 						{
 							validateGeneralConditions(pieceID, start, dests);
-							validatePlayMove(pieceID, start, dest);
+							validateMove(pieceID, start, dest);
 							/* If it passes these two without exception, it
 							 * is a legal move. */
 							this.jumpMade = jumpMadeStore;
@@ -901,8 +901,8 @@ public final class GameBoard
 				(finalDest.y == STARTING_COL_P3 && start.y != STARTING_COL_P3) ||
 				(finalDest.y == STARTING_COL_P4 && start.y != STARTING_COL_P4);
 		inGoalLine =
-				(gameState.getCurrentPlayerID() == playerOneID && finalDest.x == STARTING_ROW_P2) ||
-				(gameState.getCurrentPlayerID() == playerTwoID && finalDest.x == STARTING_ROW_P1);
+				(playerOneID.equals(gameState.getCurrentPlayerID()) && finalDest.x == STARTING_ROW_P2) ||
+				(playerTwoID != null && playerTwoID.equals(gameState.getCurrentPlayerID()) && finalDest.x == STARTING_ROW_P1);
 		inCorner =
 				(finalDest.x == 0 || finalDest.x == SIZE - 1) &&
 				(finalDest.y == 0 || finalDest.y == SIZE - 1);
@@ -929,7 +929,7 @@ public final class GameBoard
 		Player currentPlayer, opponent;
 		int startingRow;
 		
-		if (gameState.getCurrentPlayerID() == playerOneID)
+		if (playerOneID.equals(gameState.getCurrentPlayerID()))
 		{
 			currentPlayer = Player.ONE;
 			opponent = Player.TWO;
@@ -964,7 +964,7 @@ public final class GameBoard
 	 */
 	private void updateDestinationHistory(int pieceID, List<Point> dests)
 	{
-		if (this.gameState.getCurrentPlayerID() == playerOneID)
+		if (playerOneID.equals(this.gameState.getCurrentPlayerID()))
 		{
 			p1History = p1History.updateHistoryTwo(p1History.getOneMoveAgo(), p1History.getOneIDAgo());
 			p1History = p1History.updateHistoryOne(dests.get(dests.size() - 1), pieceID);
@@ -989,7 +989,7 @@ public final class GameBoard
 	{
 		Point destToTest;
 		Integer idToTest;
-		if (gameState.getCurrentPlayerID() == playerOneID)
+		if (playerOneID.equals(gameState.getCurrentPlayerID()))
 		{
 			destToTest = p1History.getTwoMoveAgo();
 			idToTest = p1History.getTwoIDAgo();
