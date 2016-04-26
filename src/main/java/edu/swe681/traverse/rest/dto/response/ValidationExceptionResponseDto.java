@@ -12,8 +12,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
  * Response dto that bundles up field and/or object errors found on a validation exception.
  */
 public class ValidationExceptionResponseDto {
-	private List<ValidationError> fieldErrors;
-	private List<ValidationError> globalErrors;
+	private List<ValidationError> fieldErrors = new ArrayList<>();
+	private List<ValidationError> globalErrors = new ArrayList<>();
 
 	public ValidationExceptionResponseDto(MethodArgumentNotValidException e) {
 		if (e.getBindingResult().getFieldErrorCount() > 0) {
