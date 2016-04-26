@@ -5,7 +5,7 @@ package edu.swe681.traverse.rest.dto.response;
  */
 public class GameResponseDto {
 
-	private long gameId;
+	private final long gameId;
 	
 	public GameResponseDto(long gameId) {
 		super();
@@ -14,10 +14,6 @@ public class GameResponseDto {
 
 	public long getGameId() {
 		return gameId;
-	}
-
-	public void setGameId(long gameId) {
-		this.gameId = gameId;
 	}
 
 	@Override
