@@ -57,6 +57,7 @@ public class GamesDao {
 	
 	
 	private final static String OPEN_GAME_IDS = "SELECT ID FROM GAMES WHERE STATUS = '" + GameStatus.WAITING_FOR_PLAYER_TWO + "'";
+	private final static String FINISHED_GAME_IDS = "SELECT ID FROM GAMES WHERE " + FINISHED_GAME_FILTER;
 	
 	
 	private final JdbcTemplate jdbcTemplate;
@@ -145,6 +146,15 @@ public class GamesDao {
 	 */
 	public List<Long> getOpenGameIds() {
 		return jdbcTemplate.queryForList(OPEN_GAME_IDS, Long.class);
+	}
+	
+	/**
+	 * Gets the list of game ids for finished games (WIN or FORFEIT status).
+	 * 
+	 * @return List of game ids
+	 */
+	public List<Long> getFinishedGameIds() {
+		return jdbcTemplate.queryForList(FINISHED_GAME_IDS, Long.class);
 	}
 	
 	// TODO: get all games with filters for: a given user id, a given status (to find open games)
