@@ -2,7 +2,7 @@ package edu.swe681.traverse.persistence.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,8 +38,8 @@ public class AuditDao
 		this.mapper = new AuditRowMapper();
 	}
 	
-	public void addAuditLine(long gameId, Timestamp timeStamp, Long playerId,
-			int pieceId, String move)
+	public void addAuditLine(long gameId, Date timeStamp, long playerId,
+			Integer pieceId, String move)
 	{
 		jdbcTemplate.update(CREATE, gameId, timeStamp, playerId, pieceId, move);
 	}
