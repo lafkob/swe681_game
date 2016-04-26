@@ -139,22 +139,32 @@ public class GameBoardTests
 	}
 	
 	@Test
-	public void LegalForfeitTest() throws TraverseException
+	public void LegalQuitTwoPlayerTest() throws TraverseException
 	{
 		board = board.playerQuit(playerTwoID);
 		assertEquals(new GameState(GameStatus.FORFEIT, playerOneID),
 				board.getGameState());
 	}
 	
-	@Test (expected=InvalidGameStateException.class)
-	public void IllegalForfeitStateTest() throws TraverseException
+	@Test
+	public void LegalQuitOnePlayerTest() throws TraverseException
 	{
 		board = new GameBoard(gameID, playerOneID, false);
+		board = board.playerQuit(playerOneID);
+		System.out.println(board.getGameState().getStatus() + ", " + board.getGameState().getCurrentPlayerID());
+		assertEquals(new GameState(GameStatus.ENDED, null), board.getGameState());
+	}
+	
+	@Test (expected=InvalidGameStateException.class)
+	public void IllegalQuitStateTest() throws TraverseException
+	{
+		board = board.playerQuit(playerOneID);
+		assertEquals(new GameState(GameStatus.FORFEIT, playerTwoID), board.getGameState());
 		board.playerQuit(playerTwoID);
 	}
 	
 	@Test (expected=InvalidGameInputException.class)
-	public void InvalidPlayerIDForfeitTest() throws TraverseException
+	public void InvalidPlayerIDQuitTest() throws TraverseException
 	{
 		board.playerQuit(5L);
 	}
