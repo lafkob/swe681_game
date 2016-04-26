@@ -22,13 +22,13 @@ public final class MoveHistory
 		if (oneMoveAgo != null)
 			this.oneMoveAgo = new Point(oneMoveAgo.x, oneMoveAgo.y);
 		else
-			this.oneMoveAgo = oneMoveAgo;
+			this.oneMoveAgo = null;
 		this.oneIDAgo = oneIDAgo;
 		
 		if (twoMoveAgo != null)
 			this.twoMoveAgo = new Point(twoMoveAgo.x, twoMoveAgo.y);
 		else
-			this.twoMoveAgo = twoMoveAgo;
+			this.twoMoveAgo = null;
 		this.twoIDAgo = twoIDAgo;
 	}
 	

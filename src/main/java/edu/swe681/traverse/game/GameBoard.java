@@ -100,7 +100,7 @@ public final class GameBoard
 	 * 
 	 * @param oldBoard GameBoard to copy to the new one
 	 */
-	protected GameBoard(GameBoard oldBoard)
+	private GameBoard(GameBoard oldBoard)
 	{
 		this(
 			oldBoard.gameID,
@@ -133,7 +133,6 @@ public final class GameBoard
 	public GameBoard(long gameID, Long playerOneID, Long playerTwoID, int[][] board,
 			GameState gameState, MoveHistory p1History, MoveHistory p2History)
 	{		
-		this.board = board;
 		this.gameID = gameID;
 		this.playerOneID = playerOneID;
 		this.playerTwoID = playerTwoID;
@@ -145,6 +144,7 @@ public final class GameBoard
 		
 		if (board != null)
 		{
+			this.board = new int[SIZE][SIZE];
 			for (int row = 0; row < SIZE; row++)
 			{
 				for (int col = 0; col < SIZE; col++)
@@ -154,7 +154,7 @@ public final class GameBoard
 			}
 		}
 		else
-			this.board = board;
+			this.board = null;
 	}
 	
 	public GameBoard(GameModel model) throws JsonParseException, JsonMappingException, IOException

@@ -115,20 +115,20 @@ public class GameBoardTests
 	public void RegisterInIllegalStateTest() throws TraverseException
 	{
 		board = board.playerQuit(playerTwoID);
-		board.registerPlayerTwo(playerTwoID);
+		board = board.registerPlayerTwo(playerTwoID);
 	}
 	
 	@Test (expected=InvalidGameInputException.class)
 	public void NegativeRegisterPlayerTest() throws TraverseException
 	{
 		board = new GameBoard(gameID, playerOneID, false);
-		board.registerPlayerTwo(-3L);
+		board = board.registerPlayerTwo(-3L);
 	}
 	
 	@Test (expected=InvalidGameStateException.class)
 	public void BothPlayersAlreadyRegisteredTest() throws TraverseException
 	{
-		board.registerPlayerTwo(playerTwoID);
+		board = board.registerPlayerTwo(playerTwoID);
 	}
 	
 	@Test (expected=InvalidGameStateException.class)
@@ -151,7 +151,6 @@ public class GameBoardTests
 	{
 		board = new GameBoard(gameID, playerOneID, false);
 		board = board.playerQuit(playerOneID);
-		System.out.println(board.getGameState().getStatus() + ", " + board.getGameState().getCurrentPlayerID());
 		assertEquals(new GameState(GameStatus.ENDED, null), board.getGameState());
 	}
 	
@@ -160,13 +159,13 @@ public class GameBoardTests
 	{
 		board = board.playerQuit(playerOneID);
 		assertEquals(new GameState(GameStatus.FORFEIT, playerTwoID), board.getGameState());
-		board.playerQuit(playerTwoID);
+		board = board.playerQuit(playerTwoID);
 	}
 	
 	@Test (expected=InvalidGameInputException.class)
 	public void InvalidPlayerIDQuitTest() throws TraverseException
 	{
-		board.playerQuit(5L);
+		board = board.playerQuit(5L);
 	}
 		
 	@Test (expected=InvalidGameInputException.class)
