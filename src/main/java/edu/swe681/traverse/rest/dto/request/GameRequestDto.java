@@ -1,5 +1,6 @@
 package edu.swe681.traverse.rest.dto.request;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -8,6 +9,7 @@ import javax.validation.constraints.NotNull;
 public class GameRequestDto {
 	
 	@NotNull
+	@Min(1) // FKs start at 1!
 	private Long gameId;
 	
 	public GameRequestDto(){}
