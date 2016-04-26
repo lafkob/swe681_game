@@ -17,7 +17,6 @@ import edu.swe681.traverse.game.enums.GameStatus;
  */
 public class GameModel {
 	
-	//TODO: Fixed all the types, but do all the nullables need an annotation now?
 	// game board
 	private String board; // serialized, nullable when there is only one player
 	private long gameId;
