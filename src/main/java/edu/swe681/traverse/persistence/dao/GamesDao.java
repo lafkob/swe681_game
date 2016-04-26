@@ -36,7 +36,7 @@ public class GamesDao {
 	
 	private final static String CREATE_GAME = "INSERT INTO GAMES (PLAYER1_ID, STATUS) VALUES (?, ?)";
 	
-	private final static String UPDATE_GAME = "UPDATE GAME SET BOARD=?, STATUS=?, CURRENT_PLAYER_ID=?, "
+	private final static String UPDATE_GAME = "UPDATE GAMES SET BOARD=?, STATUS=?, CURRENT_PLAYER_ID=?, "
 			+ "P1_ONE_MOVE_AGO_X=?, P1_ONE_MOVE_AGO_Y=?, P1_TWO_MOVE_AGO_X=?, P1_TWO_MOVE_AGO_Y=?, P1_ONE_ID_AGO=?, P1_TWO_ID_AGO=?, "
 			+ "P2_ONE_MOVE_AGO_X=?, P2_ONE_MOVE_AGO_Y=?, P2_TWO_MOVE_AGO_X=?, P2_TWO_MOVE_AGO_Y=?, P2_ONE_ID_AGO=?, P2_TWO_ID_AGO=? "
 			+ "WHERE ID = ?";
