@@ -1,9 +1,9 @@
 package edu.swe681.traverse.game;
 import java.awt.Point;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -679,7 +679,7 @@ public final class GameBoard
 	{
 		int index, temp;
 		
-		Random rnd = new Random();
+		SecureRandom rnd = new SecureRandom();
 		/* Shuffle player 1 row */
 	    for (int i = SIZE - 2; i > 1; i--)
 	    {
