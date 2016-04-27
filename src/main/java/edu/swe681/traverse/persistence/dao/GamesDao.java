@@ -50,31 +50,25 @@ public class GamesDao {
 	private final static String PLAYER_CURRENT_GAME_COUNT = 
 			"SELECT COUNT(*) as COUNT FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND " + RUNNING_GAME_FILTER;
 	
-	private final static String PLAYER_WIN_COUNT = 
-			"SELECT COUNT(*) as WINS FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID = ? AND " + FINISHED_GAME_FILTER;
-	
-	private final static String PLAYER_LOSS_COUNT = 
-			"SELECT COUNT(*) as LOSSES FROM GAMES WHERE (PLAYER1_ID = ? OR PLAYER2_ID = ?) AND CURRENT_PLAYER_ID != ? AND " + FINISHED_GAME_FILTER;
-	
 	
 	private final static String OPEN_GAME_IDS = "SELECT ID FROM GAMES WHERE STATUS = '" + GameStatus.WAITING_FOR_PLAYER_TWO + "'";
 	private final static String FINISHED_GAME_IDS = "SELECT ID FROM GAMES WHERE " + FINISHED_GAME_FILTER;
 	
 	/**
-	 * Makes heavy reuse of other query building blocks, requires 6 string parameters, all the same value: "usr.ID"
-	 * 
-	 * We want:
 	 * SELECT usr.username, 
-	 * (SELECT COUNT(*) as WINS 
+	 * (SELECT COUNT(*)  
 	 * 		FROM GAMES 
 	 * 		WHERE (PLAYER1_ID = usr.ID OR PLAYER2_ID = usr.ID) AND CURRENT_PLAYER_ID = usr.ID AND (STATUS = 'WIN' OR STATUS='FORFEIT')) as WINS, 
-	 * (SELECT COUNT(*) as LOSSES 
+	 * (SELECT COUNT(*)  
 	 * 		FROM GAMES 
 	 * 		WHERE (PLAYER1_ID = usr.ID OR PLAYER2_ID = usr.ID) AND CURRENT_PLAYER_ID != usr.ID AND (STATUS = 'WIN' OR STATUS='FORFEIT')) as LOSSES 
 	 * FROM USERS usr;
 	 */
 	private final static String SELECT_USER_INFO = 
-			"SELECT usr.username, (" + PLAYER_WIN_COUNT + ") as WINS, (" + PLAYER_LOSS_COUNT + ") as LOSSES FROM USERS usr";
+		"SELECT usr.username, " + 
+		"(SELECT COUNT(*) FROM GAMES WHERE (PLAYER1_ID = usr.ID OR PLAYER2_ID = usr.ID) AND CURRENT_PLAYER_ID = usr.ID AND" + FINISHED_GAME_FILTER + ") as WINS, " + 
+		"(SELECT COUNT(*) FROM GAMES WHERE (PLAYER1_ID = usr.ID OR PLAYER2_ID = usr.ID) AND CURRENT_PLAYER_ID != usr.ID AND " + FINISHED_GAME_FILTER + ") as LOSSES " + 
+		"FROM USERS usr";
 	
 	
 	private final JdbcTemplate jdbcTemplate;
@@ -147,8 +141,7 @@ public class GamesDao {
 	public List<UserInfoResponseDto> getAllUserInfo() {
 		// since this query heavily reuses other building blocks, we have to stick these in all parameters
 		// so that the joins are done properly
-		Object[] params = {"usr.ID", "usr.ID", "usr.ID", "usr.ID", "usr.ID", "usr.ID"};
-		return jdbcTemplate.query(SELECT_USER_INFO, userInfoMapper, params);
+		return jdbcTemplate.query(SELECT_USER_INFO, userInfoMapper);
 	}
 	
 	/**
