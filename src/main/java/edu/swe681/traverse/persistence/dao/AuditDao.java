@@ -44,7 +44,7 @@ public class AuditDao
 		jdbcTemplate.update(CREATE, gameId, timeStamp, playerId, pieceId, move);
 	}
 	
-	public List<AuditModel> getAuditsByGameId(String gameId)
+	public List<AuditModel> getAuditsByGameId(long gameId)
 	{
 		return jdbcTemplate.query(FIND_BY_GAME_ID, mapper, gameId);
 	}
@@ -65,7 +65,7 @@ public class AuditDao
 		public AuditModel mapRow(ResultSet rs, int rowNum) throws SQLException
 		{
 			return new AuditModel(rs.getLong(ID_COL), rs.getLong(GAME_ID_COL), 
-					rs.getDate(TIMESTAMP_COL), rs.getLong(PLAYER_ID_COL),
+					new Date(rs.getTimestamp(TIMESTAMP_COL).getTime()), rs.getLong(PLAYER_ID_COL),
 					DaoUtils.getInteger(rs, PIECE_ID_COL), rs.getString(MOVE_COL));
 		}
 	}
