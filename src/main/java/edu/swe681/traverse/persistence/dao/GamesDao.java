@@ -37,7 +37,7 @@ public class GamesDao {
 	
 	private final static String CREATE_GAME = "INSERT INTO GAMES (PLAYER1_ID, STATUS) VALUES (?, ?)";
 	
-	private final static String UPDATE_GAME = "UPDATE GAMES SET BOARD=?, STATUS=?, CURRENT_PLAYER_ID=?, "
+	private final static String UPDATE_GAME = "UPDATE GAMES SET BOARD=?, STATUS=?, PLAYER1_ID=?, PLAYER2_ID=?, CURRENT_PLAYER_ID=?, "
 			+ "P1_ONE_MOVE_AGO_X=?, P1_ONE_MOVE_AGO_Y=?, P1_TWO_MOVE_AGO_X=?, P1_TWO_MOVE_AGO_Y=?, P1_ONE_ID_AGO=?, P1_TWO_ID_AGO=?, "
 			+ "P2_ONE_MOVE_AGO_X=?, P2_ONE_MOVE_AGO_Y=?, P2_TWO_MOVE_AGO_X=?, P2_TWO_MOVE_AGO_Y=?, P2_ONE_ID_AGO=?, P2_TWO_ID_AGO=? "
 			+ "WHERE ID = ?";
@@ -132,9 +132,10 @@ public class GamesDao {
 	 * @param m GameModel representing a row in the games table.
 	 */
 	public void updateGame(GameModel m) {
-		jdbcTemplate.update(UPDATE_GAME, m.getBoard(), m.getGameStatus().toString(), m.getCurrentPlayerId(),
-				m.getP1OneMoveAgoX(), m.getP1OneMoveAgoY(), m.getP1TwoMoveAgoX(), m.getP1TwoMoveAgoY(), m.getP1OneIdAgo(), m.getP1TwoIdAgo(),
-				m.getP2OneMoveAgoX(), m.getP2OneMoveAgoY(), m.getP2TwoMoveAgoX(), m.getP2TwoMoveAgoY(), m.getP2OneIdAgo(), m.getP2TwoIdAgo(), 
+		jdbcTemplate.update(UPDATE_GAME, m.getBoard(), m.getGameStatus().toString(), m.getPlayerOneId(),
+				m.getPlayerTwoId(), m.getCurrentPlayerId(), m.getP1OneMoveAgoX(), m.getP1OneMoveAgoY(),
+				m.getP1TwoMoveAgoX(), m.getP1TwoMoveAgoY(), m.getP1OneIdAgo(), m.getP1TwoIdAgo(), m.getP2OneMoveAgoX(),
+				m.getP2OneMoveAgoY(), m.getP2TwoMoveAgoX(), m.getP2TwoMoveAgoY(), m.getP2OneIdAgo(), m.getP2TwoIdAgo(),
 				m.getGameId());
 	}
 	
