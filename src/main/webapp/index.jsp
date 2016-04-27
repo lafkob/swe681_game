@@ -9,12 +9,17 @@
 	<h4>Main Menu Options:</h4>
 	<form action="./logout" method="post">
 		<input type="button" id="startBtn" value="Start a game" />
-		<input type="button" id="openGamesBtn" value="Find Open Games" />
-		<input type="button" id="finishedGamesBtn" value="Find Finished Games" />
-		<input type="button" id="userInfoBtn" value="Get User Stats" />
+		<input type="button" id="openGamesBtn" value="See open games" />
+		<input type="button" id="finishedGamesBtn" value="See finished games" />
+		<input type="button" id="userInfoBtn" value="Get user stats" />
 		<input type="button" id="pingBtn" value="Ping server" />
 		<input type="submit" id="logoutBtn" value="Log out" /> <input type="hidden"
 			id="_csrf_token" name="${_csrf.parameterName}" value="${_csrf.token}" />
+			
+		<br/><br/><br/>
+		Game History:
+		<input id="auditGameId" placeholder="Game ID*"/>
+		<input type="button" id="auditBtn" value="Fetch" />
 	</form>
 	<hr>
 	<h4>Game Options:</h4>
