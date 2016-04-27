@@ -20,8 +20,8 @@ import edu.swe681.traverse.game.enums.GameStatus;
  * taken too long to make a move in their game.
  */
 @Component
-public class ForfeitScheduledJob {
-	private static final Logger LOG = LoggerFactory.getLogger(ForfeitScheduledJob.class);
+public class ForfeitChecker {
+	private static final Logger LOG = LoggerFactory.getLogger(ForfeitChecker.class);
 	
 	/**
 	 * Conditional select to get the player who is NOT the current player.
@@ -36,12 +36,12 @@ public class ForfeitScheduledJob {
 			"UPDATE GAMES SET CURRENT_PLAYER_ID = ("+ SELECT_NON_CURRENT_PLAYER + "), STATUS = '" + GameStatus.FORFEIT +
 			"' WHERE ID IN (" + SELECT_EXPIRED_GAME_IDS + ") AND STATUS = '" + GameStatus.PLAY + "'";
 	
-	private final static int EXPIRATION_MINUTES = 5;
+	private final static int TIMEOUT_MINUTES = 5;
 	
 	private final JdbcTemplate jdbcTemplate;
 	
 	@Autowired
-	public ForfeitScheduledJob(DataSource datasource)
+	public ForfeitChecker(DataSource datasource)
 	{
 		Objects.requireNonNull(datasource, "datasource required");
 		this.jdbcTemplate = new JdbcTemplate(datasource);
@@ -54,7 +54,7 @@ public class ForfeitScheduledJob {
 	public void processForfeits() {
 		LOG.info("Running forfeit process job");
 		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.MINUTE, 0 - EXPIRATION_MINUTES);
+		cal.add(Calendar.MINUTE, 0 - TIMEOUT_MINUTES);
 		
 		int updated = jdbcTemplate.update(FORFEIT_EXPIRED_GAMES, new Timestamp(cal.getTimeInMillis()));
 		LOG.info("Forfeited " + updated + "games");
