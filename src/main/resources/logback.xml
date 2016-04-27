@@ -10,10 +10,10 @@
 	    </encoder>
 	</appender>
 	
-	<appender name="AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    	<file>logs/traverseAudit.log</file>
+	<appender name="CONTROLLER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    	<file>logs/traverseGameController.log</file>
     	<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">        
-        	<fileNamePattern>logs/traverseAudit%i.log</fileNamePattern>
+        	<fileNamePattern>logs/traverseGameController%i.log</fileNamePattern>
         	<minIndex>1</minIndex>
         	<maxIndex>10</maxIndex>
     	</rollingPolicy>
@@ -27,17 +27,40 @@
         		%d{yyyy-MM-dd HH:mm:ss} - %msg%n
         	</pattern>
     	</encoder>
-	</appender>   
+	</appender>
 	
-	<logger name="org.springframework" level="info" additivity="false">
-		<appender-ref ref="STDOUT" />
+	<appender name="OTHER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    	<file>logs/traverseOther.log</file>
+    	<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">        
+        	<fileNamePattern>logs/traverseOther%i.log</fileNamePattern>
+        	<minIndex>1</minIndex>
+        	<maxIndex>10</maxIndex>
+    	</rollingPolicy>
+    	
+    	<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+    		<maxFileSize>10KB</maxFileSize>
+    	</triggeringPolicy>
+    	
+    	<encoder>
+        	<pattern>
+        		%d{yyyy-MM-dd HH:mm:ss} - %msg%n
+        	</pattern>
+    	</encoder>
+	</appender>
+	
+	<logger name="org.springframework" level="info" additivity="true">
+		<appender-ref ref="OTHER" />
 	</logger>
 	
-	<logger name="audit" level="debug" additivity="true">
-		<appender-ref ref="AUDIT" />
+	<logger name="edu.swe681.traverse.rest" level="debug" additivity="true">
+		<appender-ref ref="CONTROLLER" />
+	</logger>
+	
+	<logger name="edu.swe681" level="debug" additivity="true">
+		<appender-ref ref="OTHER" />
 	</logger>
 	 
-	<root level="error">
+	<root level="debug">
 		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>

@@ -1,7 +1,5 @@
 package edu.swe681.traverse.application;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,8 +21,6 @@ import edu.swe681.traverse.rest.dto.response.ValidationExceptionResponseDto;
  */
 @ControllerAdvice
 public class GlobalExceptionHandlers {
-
-	private static final Logger LOG = LoggerFactory.getLogger("audit");
 	
 	/**
 	 * Handler for bean annotation validation exceptions to return 400 - Bad
@@ -37,7 +33,6 @@ public class GlobalExceptionHandlers {
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	public ValidationExceptionResponseDto handleValidationException(MethodArgumentNotValidException e) {
-		//TODO: What to log here?
 		return new ValidationExceptionResponseDto(e);
 	}
 
@@ -52,7 +47,6 @@ public class GlobalExceptionHandlers {
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	public MessageOnlyExceptionResponseDto handleBadRequestException(Exception e) {
-		LOG.warn(e.getMessage());
 		return new MessageOnlyExceptionResponseDto(e.getMessage());
 	}
 
@@ -67,7 +61,6 @@ public class GlobalExceptionHandlers {
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.NOT_FOUND)
 	public MessageOnlyExceptionResponseDto handleNotFoundException(Exception e) {
-		LOG.warn(e.getMessage());
 		return new MessageOnlyExceptionResponseDto(e.getMessage());
 	}
 	
@@ -96,7 +89,6 @@ public class GlobalExceptionHandlers {
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
 	public MessageOnlyExceptionResponseDto handleDataAccessException(Exception e) {
-		LOG.warn(e.getMessage());
 		return new MessageOnlyExceptionResponseDto("An internal error has occurred, please contact admin");
 	}
 
@@ -111,7 +103,6 @@ public class GlobalExceptionHandlers {
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED)
 	public MessageOnlyExceptionResponseDto notImplementedHandler(Exception e) {
-		LOG.warn(e.getMessage());
 		return new MessageOnlyExceptionResponseDto("Method not yet implemented");
 	}
 }

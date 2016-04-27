@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 @Controller
 public class PingController {
 
-	private static final Logger LOG = LoggerFactory.getLogger("audit");
+	private static final Logger LOG = LoggerFactory.getLogger(PingController.class);
 	
 	@RequestMapping(value="/api/ping", method = RequestMethod.GET)
 	@ResponseBody
