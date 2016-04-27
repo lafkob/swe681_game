@@ -428,6 +428,14 @@ public final class GameBoard
 		else
 		{
 			newBoard.advanceTurn();
+			/*
+			 * If the next player has no available moves, skip him and
+			 * return to the other player.
+			 */
+			if (!newBoard.movesAreAvailable())
+			{
+				newBoard.advanceTurn();
+			}
 		}
 		
 		return newBoard;
