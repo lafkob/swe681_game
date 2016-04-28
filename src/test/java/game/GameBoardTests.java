@@ -18,6 +18,7 @@ import edu.swe681.traverse.game.GameState;
 import edu.swe681.traverse.game.MoveHistory;
 import edu.swe681.traverse.game.enums.GamePieceType;
 import edu.swe681.traverse.game.enums.GameStatus;
+import edu.swe681.traverse.game.enums.Player;
 import edu.swe681.traverse.game.exception.*;
 import edu.swe681.traverse.model.GameModel;
 
@@ -649,6 +650,35 @@ public class GameBoardTests
 				new GameState(GameStatus.WIN, playerOneID), board.getGameState());
 		
 		board = parseAndMakeMove(board, "12,0 5");
+	}
+	
+	@Test
+	public void GameEngineEqualsHashcodeTests() throws TraverseException
+	{
+		MoveHistory history1, history2;
+		GamePiece piece1, piece2;
+		GameBoard board2;
+		GameState state1, state2;
+		
+		history1 = new MoveHistory(0,1,0,9,1,8);
+		history2 = new MoveHistory(0,1,0,9,1,8);
+		assertEquals(history1, history2);
+		assertEquals(history1.hashCode(), history2.hashCode());
+		
+		piece1 = new GamePiece(GamePieceType.CIRCLE, Player.ONE);
+		piece2 = new GamePiece(GamePieceType.CIRCLE, Player.ONE);
+		assertEquals(piece1, piece2);
+		assertEquals(piece1.hashCode(), piece2.hashCode());
+		
+		board2 = new GameBoard(gameID, playerOneID, false);
+		board2 = board2.registerPlayerTwo(playerTwoID);
+		assertEquals(board, board2);
+		assertEquals(board.hashCode(), board2.hashCode());
+		
+		state1 = new GameState(GameStatus.PLAY, playerOneID);
+		state2 = new GameState(GameStatus.PLAY, playerOneID);
+		assertEquals(state1, state2);
+		assertEquals(state1.hashCode(), state2.hashCode());
 	}
 	
 	private GameBoard parseAndMakeMove(GameBoard board, String moveStr)
