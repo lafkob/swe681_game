@@ -20,9 +20,9 @@ import edu.swe681.traverse.model.UserModel;
 @Service
 public class UsersDao {
 
-	private final String CREATE = "INSERT INTO USERS (USERNAME, PASSWORD_HASH, ENABLED) VALUES (?, ?, true)";
-	private final String CREATE_ROLE = "INSERT INTO user_roles (username, role) VALUES(?, 'ROLE_USER')";
-	private final String FIND_BY_USERNAME = "SELECT ID, USERNAME, PASSWORD_HASH FROM USERS WHERE USERNAME = ?";
+	private static final String CREATE = "INSERT INTO USERS (USERNAME, PASSWORD_HASH, ENABLED) VALUES (?, ?, true)";
+	private static final String CREATE_ROLE = "INSERT INTO user_roles (username, role) VALUES(?, 'ROLE_USER')";
+	private static final String FIND_BY_USERNAME = "SELECT ID, USERNAME, PASSWORD_HASH FROM USERS WHERE USERNAME = ?";
 
 	private final JdbcTemplate jdbcTemplate;
 	private final UsersRowMapper mapper;

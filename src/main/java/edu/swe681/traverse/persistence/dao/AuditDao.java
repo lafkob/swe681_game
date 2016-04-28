@@ -22,9 +22,9 @@ import edu.swe681.traverse.utils.DaoUtils;
 @Service
 public class AuditDao
 {
-	private final String CREATE = "INSERT INTO audit (GAME_ID, TIMESTAMP, PLAYER_ID, "
+	private static final String CREATE = "INSERT INTO audit (GAME_ID, TIMESTAMP, PLAYER_ID, "
 			+ "PIECE_ID, MOVE) VALUES (?, ?, ?, ?, ?)";
-	private final String FIND_BY_GAME_ID = "SELECT ID, GAME_ID, TIMESTAMP, PLAYER_ID, "
+	private static final String FIND_BY_GAME_ID = "SELECT ID, GAME_ID, TIMESTAMP, PLAYER_ID, "
 			+ "PIECE_ID, MOVE FROM audit WHERE GAME_ID = ? ORDER BY TIMESTAMP DESC";
 	
 	private final JdbcTemplate jdbcTemplate;
