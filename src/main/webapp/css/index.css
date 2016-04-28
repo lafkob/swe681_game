@@ -16,3 +16,8 @@ div.rightPanel {
 	display: inline-block;
 	margin: 20px;
 }
+
+body h4 {
+	margin-bottom: 5px;
+	text-decoration: underline;
+}
