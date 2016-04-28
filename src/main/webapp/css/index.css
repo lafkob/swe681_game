@@ -21,3 +21,11 @@ body h4 {
 	margin-bottom: 5px;
 	text-decoration: underline;
 }
+
+input#moveGameId, input#pieceId {
+	width: 75px;
+}
+
+input#move {
+	width: 250px;
+}

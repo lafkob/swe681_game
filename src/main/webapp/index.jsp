@@ -7,7 +7,7 @@
 </head>
 
 <body>
-	<h4>Main Menu Options:</h4>
+	<h4>Main Menu Options</h4>
 	<form action="./logout" method="post">
 		<input type="button" id="startBtn" value="Start a game" />
 		<input type="button" id="openGamesBtn" value="See open games" />
@@ -16,21 +16,30 @@
 		<input type="button" id="pingBtn" value="Ping server" />
 		<input type="submit" id="logoutBtn" value="Log out" /> <input type="hidden"
 			id="_csrf_token" name="${_csrf.parameterName}" value="${_csrf.token}" />
-			
-		<br/><br/><br/>
-		Game History:
-		<input id="auditGameId" placeholder="Game ID*"/>
+		<br/><br/>
+		Game History:&nbsp;
+		<input id="auditGameId" placeholder="Game ID"/>
 		<input type="button" id="auditBtn" value="Fetch" />
 	</form>
+	
 	<hr>
-	<h4>Game Options:</h4>
-	<input id="gameId" placeholder="Game ID*"/><br/><br/>
+	
+	<h4>Game Options</h4>
+	Join, Quit, Status:&nbsp;
+	<input id="gameId" placeholder="Game ID"/>
 	<input type="button" id="joinBtn" value="Join game" />
 	<input type="button" id="quitBtn" value="Quit game" />
 	<input type="button" id="statusBtn" value="Game status" />
-	<input type="button" id="moveBtn" value="Make move" />
+	<br/><br/>
+	Move Piece:&nbsp;
+	<input id="moveGameId" placeholder="Game ID"/>
+	<input id="pieceId" placeholder="Piece ID"/>
+	<input id="move" placeholder="x1,y2|x2,y2|x3,y3...."/>
+	<input type="button" id="moveBtn" value="Move" />
+	
 	<hr>
-	<h4>Result:</h4>
+	
+	<h4>Result</h4>
 	<div id="reqResult"></div>
 </body>
 </html>

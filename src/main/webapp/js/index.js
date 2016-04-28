@@ -36,7 +36,9 @@ $(function() {
 
 	$('#moveBtn').click(function() {
 		reqData = {};
-		reqData.gameId = $("#gameId").val();
+		reqData.gameId = $("#moveGameId").val();
+		reqData.pieceId = $("#pieceId").val();
+		reqData.moves = utils.parseMoves();
 		$.ajax({
 			type : "POST",
 			url : "./api/game/move",
@@ -158,5 +160,16 @@ utils = {
 		key += "14, 15 -> Triangle Piece<br/>";
 		key += "</div>"
 		return key;
+	},
+	
+	parseMoves: function() {
+		var pairs = $("#move").val().split("|");
+		var coords;
+		var moves = [];
+		for (var idx = 0; idx < pairs.length; idx++) {
+			coords = pairs[idx].split(",");
+			moves.push({x:coords[0], y:coords[1]});
+		}
+		return moves;
 	}
 };
