@@ -301,6 +301,7 @@ public class GameRestController {
 	
 	/**
 	 * Converts a list of Coordinates into a string suitable for auditing moves.
+	 * The game engine limits the number of possible coordinates to 10.
 	 * 
 	 * @param coords Coordinate objects to convert
 	 * @return String representation of the objects or null if coords is null
@@ -308,7 +309,6 @@ public class GameRestController {
 	private String coordinatesToString(List<Coordinate> coords) {
 		if(coords == null) return null;
 		
-		// TODO: do we have a limit on the coordinates? the database can't take more than 128....
 		StringBuilder builder = new StringBuilder();
 		if(!coords.isEmpty()) {
 			// append the first one, no commas
