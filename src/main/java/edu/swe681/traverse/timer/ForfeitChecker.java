@@ -57,7 +57,7 @@ public class ForfeitChecker {
 		cal.add(Calendar.MINUTE, 0 - TIMEOUT_MINUTES);
 		
 		int updated = jdbcTemplate.update(FORFEIT_EXPIRED_GAMES, new Timestamp(cal.getTimeInMillis()));
-		LOG.info("Forfeited " + updated + "games");
+		LOG.info("Forfeited " + updated + " games");
 		
 		// TODO: remove
 //		System.out.println("Forfeited " + updated + " games");
