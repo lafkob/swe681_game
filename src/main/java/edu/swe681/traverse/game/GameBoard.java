@@ -3,6 +3,7 @@ import java.awt.Point;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -195,6 +196,8 @@ public final class GameBoard
 			throw new InvalidGameInputException("PlayerID must be positive.");
 		}
 		
+		/* With the way statuses change this is unreachable, but I thought I'd keep
+		 * it in as a fail-safe anyway */
 		if (this.playerTwoID != null)
 			throw new InvalidGameStateException("Both players are already registered.");
 		
@@ -309,6 +312,7 @@ public final class GameBoard
 			}
 		}
 		
+		/* Unreachable code */
 		return null;
 	}
 	
@@ -1017,62 +1021,69 @@ public final class GameBoard
 		
 		return false;
 	}
-	
+
 	@Override
-	public String toString()
-	{
-		String ret = "";
-		GamePiece piece;
-		int id;
-		boolean showSymbol, showID;
-		
-		showSymbol = false;
-		showID = true;
-		
-		for (int row = 0; row < SIZE; row++)
-		{
-			for (int col = 0; col < SIZE; col++)
-			{
-				id = board[row][col];
-				if (id < 0)
-				{
-					if (showID || !showSymbol)
-						ret += " ";
-					
-					if (row == STARTING_ROW_P1 || row == STARTING_ROW_P2 ||
-						col == STARTING_COL_P3 || col == STARTING_COL_P4)
-						ret += "=";
-					else
-						ret += "-";
-					
-					if (showID && showSymbol)
-						ret += " ";
-				}
-	
-				else
-				{
-					piece = Game.PIECES[id];
-					if (showSymbol)
-					{
-						if (piece.getPieceType() == GamePieceType.CIRCLE)
-							ret += "O";
-						else if (piece.getPieceType() == GamePieceType.SQUARE)
-							ret += "#";
-						else if (piece.getPieceType() == GamePieceType.DIAMOND)
-							ret += "+";
-						else
-							ret += "^";
-					}
-					if (showID || !showSymbol)
-					ret += String.format("%2d", id);
-				}
-				
-				if (col != SIZE - 1)
-					ret += " ";
-			}
-			ret += "\n";
-		}
-		
-		return ret;
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.deepHashCode(board);
+		result = prime * result + (int) (gameID ^ (gameID >>> 32));
+		result = prime * result + ((gameState == null) ? 0 : gameState.hashCode());
+		result = prime * result + (jumpMade ? 1231 : 1237);
+		result = prime * result + ((p1History == null) ? 0 : p1History.hashCode());
+		result = prime * result + ((p2History == null) ? 0 : p2History.hashCode());
+		result = prime * result + ((playerOneID == null) ? 0 : playerOneID.hashCode());
+		result = prime * result + ((playerTwoID == null) ? 0 : playerTwoID.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		GameBoard other = (GameBoard) obj;
+		if (!Arrays.deepEquals(board, other.board))
+			return false;
+		if (gameID != other.gameID)
+			return false;
+		if (gameState == null) {
+			if (other.gameState != null)
+				return false;
+		} else if (!gameState.equals(other.gameState))
+			return false;
+		if (jumpMade != other.jumpMade)
+			return false;
+		if (p1History == null) {
+			if (other.p1History != null)
+				return false;
+		} else if (!p1History.equals(other.p1History))
+			return false;
+		if (p2History == null) {
+			if (other.p2History != null)
+				return false;
+		} else if (!p2History.equals(other.p2History))
+			return false;
+		if (playerOneID == null) {
+			if (other.playerOneID != null)
+				return false;
+		} else if (!playerOneID.equals(other.playerOneID))
+			return false;
+		if (playerTwoID == null) {
+			if (other.playerTwoID != null)
+				return false;
+		} else if (!playerTwoID.equals(other.playerTwoID))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "GameBoard [board=" + Arrays.toString(board) + ", gameState=" + gameState + ", gameID=" + gameID
+				+ ", playerOneID=" + playerOneID + ", playerTwoID=" + playerTwoID + ", p1History=" + p1History
+				+ ", p2History=" + p2History + ", jumpMade=" + jumpMade + "]";
 	}
 }

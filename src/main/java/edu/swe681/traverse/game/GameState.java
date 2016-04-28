@@ -95,4 +95,9 @@ public final class GameState
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "GameState [status=" + status + ", currentPlayerID=" + currentPlayerID + "]";
+	}
 }

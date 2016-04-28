@@ -11,9 +11,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.swe681.traverse.game.Game;
 import edu.swe681.traverse.game.GameBoard;
+import edu.swe681.traverse.game.GamePiece;
 import edu.swe681.traverse.game.GameState;
 import edu.swe681.traverse.game.MoveHistory;
+import edu.swe681.traverse.game.enums.GamePieceType;
 import edu.swe681.traverse.game.enums.GameStatus;
 import edu.swe681.traverse.game.exception.*;
 import edu.swe681.traverse.model.GameModel;
@@ -723,5 +726,71 @@ public class GameBoardTests
 		}
 		
 		return newBoard;
+	}
+	
+	/**
+	 * Testing utility function to provide a visual of a GameBoard.
+	 * If both showSymbol and showID are false, the default is to show
+	 * just the ID.
+	 * 
+	 * @param board A game board to print
+	 * @param showSymbol True if you want to show the symbols, false otherwise
+	 * @param showID True if you want to show the piece IDs, false otherwise
+	 */
+	private void printBoard(GameBoard board, boolean showSymbol, boolean showID)
+	{
+		String ret = "";
+		GamePiece piece;
+		int id;
+		int[][] boardRep = board.getBoard();
+		
+		if (!showSymbol && !showID)
+			showID = true;
+		
+		for (int row = 0; row < GameBoard.SIZE; row++)
+		{
+			for (int col = 0; col < GameBoard.SIZE; col++)
+			{
+				id = boardRep[row][col];
+				if (id < 0)
+				{
+					if (showID || !showSymbol)
+						ret += " ";
+					
+					if (row == 0 || row == GameBoard.SIZE - 1 ||
+						col == 0 || col == GameBoard.SIZE - 1)
+						ret += "=";
+					else
+						ret += "-";
+					
+					if (showID && showSymbol)
+						ret += " ";
+				}
+	
+				else
+				{
+					piece = Game.PIECES[id];
+					if (showSymbol)
+					{
+						if (piece.getPieceType() == GamePieceType.CIRCLE)
+							ret += "O";
+						else if (piece.getPieceType() == GamePieceType.SQUARE)
+							ret += "#";
+						else if (piece.getPieceType() == GamePieceType.DIAMOND)
+							ret += "+";
+						else
+							ret += "^";
+					}
+					if (showID || !showSymbol)
+					ret += String.format("%2d", id);
+				}
+				
+				if (col != GameBoard.SIZE - 1)
+					ret += " ";
+			}
+			ret += "\n";
+		}
+		
+		System.out.println(ret);
 	}
 }

@@ -127,4 +127,10 @@ public final class MoveHistory
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "MoveHistory [oneMoveAgo=" + oneMoveAgo + ", twoMoveAgo=" + twoMoveAgo + ", oneIDAgo=" + oneIDAgo
+				+ ", twoIDAgo=" + twoIDAgo + "]";
+	}
 }
