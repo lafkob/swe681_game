@@ -21,7 +21,7 @@ public class AuditModel implements Comparable<AuditModel>
 		super();
 		this.id = id;
 		this.gameId = gameId;
-		this.timeStamp = timeStamp;
+		this.timeStamp = new Date(timeStamp.getTime());
 		this.playerId = playerId;
 		this.pieceId = pieceId;
 		this.move = move;
@@ -44,11 +44,11 @@ public class AuditModel implements Comparable<AuditModel>
 	}
 
 	public Date getTimeStamp() {
-		return timeStamp;
+		return new Date(timeStamp.getTime());
 	}
 
 	public void setTimeStamp(Date timeStamp) {
-		this.timeStamp = timeStamp;
+		this.timeStamp = new Date(timeStamp.getTime());
 	}
 
 	public long getPlayerId() {

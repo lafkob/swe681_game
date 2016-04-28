@@ -3,6 +3,7 @@ package edu.swe681.traverse.rest.dto.response;
 import java.util.Arrays;
 import java.util.Objects;
 
+import edu.swe681.traverse.game.GameBoard;
 import edu.swe681.traverse.game.enums.GameStatus;
 
 /**
@@ -29,7 +30,16 @@ public class GameStatusResponseDto extends GameResponseDto {
 	}
 
 	public int[][] getBoard() {
-		return board;
+		int[][] retBoard = new int[GameBoard.SIZE][GameBoard.SIZE];
+		for (int i = 0; i < GameBoard.SIZE; i++)
+		{
+			for (int j = 0; j < GameBoard.SIZE; j++)
+			{
+				retBoard[i][j] = this.board[i][j];
+			}
+		}
+		
+		return retBoard;
 	}
 
 	public Long getCurrentPlayerId() {
