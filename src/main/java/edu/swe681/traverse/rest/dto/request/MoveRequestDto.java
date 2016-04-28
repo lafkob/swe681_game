@@ -5,8 +5,7 @@ import java.util.List;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 import edu.swe681.traverse.game.Game;
 import edu.swe681.traverse.rest.dto.Coordinate;
@@ -29,7 +28,7 @@ public class MoveRequestDto extends GameRequestDto {
 	 * Represents the ordered list of moves requested by the client.
 	 */
 	@NotNull
-	@NotEmpty
+	@Size(min=1, max=10)
 	public List<Coordinate> moves;
 
 	public MoveRequestDto() {
