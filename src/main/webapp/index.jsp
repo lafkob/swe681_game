@@ -3,6 +3,7 @@
 <title>Index Page for Traverse</title>
 <script type="text/javascript" src="js/lib/jquery-2.2.2.min.js"></script>
 <script type="text/javascript" src="js/index.js"></script>
+<link rel="stylesheet" type="text/css" href="css/index.css">
 </head>
 
 <body>
@@ -23,7 +24,7 @@
 	</form>
 	<hr>
 	<h4>Game Options:</h4>
-	Game ID: <input id="gameId" /><br/><br/>
+	<input id="gameId" placeholder="Game ID*"/><br/><br/>
 	<input type="button" id="joinBtn" value="Join game" />
 	<input type="button" id="quitBtn" value="Quit game" />
 	<input type="button" id="statusBtn" value="Game status" />
