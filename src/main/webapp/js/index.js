@@ -122,7 +122,7 @@ utils = {
 	
 	createBoardDisplay: function(board2dArray) {
 		var boardDisplay = "<b>Board Display</b><br/>";
-		boardDisplay += "(0,0 in bottom left)<br/>";
+		boardDisplay += "(0,0 is in the bottom left)<br/>";
 		boardDisplay += "<div>"; // wrap the two panels
 		boardDisplay += "<div class=\"leftPanel\">"; // board panel
 		boardDisplay += "<table class=\"board\">";
@@ -168,7 +168,7 @@ utils = {
 		var moves = [];
 		for (var idx = 0; idx < pairs.length; idx++) {
 			coords = pairs[idx].split(",");
-			moves.push({x:coords[0], y:coords[1]});
+			moves.push({y:coords[0], x:coords[1]}); // flip-flop for now with current board draw orientation
 		}
 		return moves;
 	}
