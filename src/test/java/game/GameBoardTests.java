@@ -11,7 +11,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.swe681.traverse.game.Game;
 import edu.swe681.traverse.game.GameBoard;
 import edu.swe681.traverse.game.GamePiece;
 import edu.swe681.traverse.game.GameState;
@@ -767,15 +766,12 @@ public class GameBoardTests
 	 * @param showSymbol True if you want to show the symbols, false otherwise
 	 * @param showID True if you want to show the piece IDs, false otherwise
 	 */
-	private void printBoard(GameBoard board, boolean showSymbol, boolean showID)
+	private void printBoard(GameBoard board)
 	{
 		String ret = "";
 		GamePiece piece;
 		int id;
 		int[][] boardRep = board.getBoard();
-		
-		if (!showSymbol && !showID)
-			showID = true;
 		
 		for (int row = 0; row < GameBoard.SIZE; row++)
 		{
@@ -784,34 +780,16 @@ public class GameBoardTests
 				id = boardRep[row][col];
 				if (id < 0)
 				{
-					if (showID || !showSymbol)
-						ret += " ";
+					ret += " ";
 					
 					if (row == 0 || row == GameBoard.SIZE - 1 ||
 						col == 0 || col == GameBoard.SIZE - 1)
 						ret += "=";
 					else
 						ret += "-";
-					
-					if (showID && showSymbol)
-						ret += " ";
 				}
-	
 				else
 				{
-					piece = Game.PIECES[id];
-					if (showSymbol)
-					{
-						if (piece.getPieceType() == GamePieceType.CIRCLE)
-							ret += "O";
-						else if (piece.getPieceType() == GamePieceType.SQUARE)
-							ret += "#";
-						else if (piece.getPieceType() == GamePieceType.DIAMOND)
-							ret += "+";
-						else
-							ret += "^";
-					}
-					if (showID || !showSymbol)
 					ret += String.format("%2d", id);
 				}
 				
