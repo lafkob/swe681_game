@@ -36,7 +36,7 @@ public class ForfeitChecker {
 			"UPDATE GAMES SET CURRENT_PLAYER_ID = ("+ SELECT_NON_CURRENT_PLAYER + "), STATUS = '" + GameStatus.FORFEIT +
 			"' WHERE ID IN (" + SELECT_EXPIRED_GAME_IDS + ") AND STATUS = '" + GameStatus.PLAY + "'";
 	
-	private final static int TIMEOUT_MINUTES = 5;
+	private final static int TIMEOUT_MINUTES = 10;
 	
 	private final JdbcTemplate jdbcTemplate;
 	
