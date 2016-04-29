@@ -53,17 +53,17 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 	
-	<logger name="edu.swe681.traverse.rest" level="debug" additivity="false">
+	<logger name="edu.swe681.traverse.rest" level="info" additivity="false">
 		<appender-ref ref="CONTROLLER" />
 		<appender-ref ref="STDOUT" />
 	</logger>
 	
-	<logger name="edu.swe681" level="debug" additivity="false">
+	<logger name="edu.swe681" level="info" additivity="false">
 		<appender-ref ref="OTHER" />
 		<appender-ref ref="STDOUT" />
 	</logger>
 	 
-	<root level="debug">
+	<root level="info">
 		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>
