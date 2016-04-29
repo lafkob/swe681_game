@@ -25,7 +25,7 @@ public class AuditDao
 	private static final String CREATE = "INSERT INTO audit (GAME_ID, TIMESTAMP, PLAYER_ID, "
 			+ "PIECE_ID, MOVE) VALUES (?, ?, ?, ?, ?)";
 	private static final String FIND_BY_GAME_ID = "SELECT ID, GAME_ID, TIMESTAMP, PLAYER_ID, "
-			+ "PIECE_ID, MOVE FROM audit WHERE GAME_ID = ? ORDER BY TIMESTAMP DESC";
+			+ "PIECE_ID, MOVE FROM audit WHERE GAME_ID = ? ORDER BY TIMESTAMP ASC";
 	
 	private final JdbcTemplate jdbcTemplate;
 	private final AuditRowMapper mapper;
