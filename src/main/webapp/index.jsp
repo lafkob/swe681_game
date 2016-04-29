@@ -34,7 +34,7 @@
 	Move Piece:&nbsp;
 	<input id="moveGameId" placeholder="Game ID"/>
 	<input id="pieceId" placeholder="Piece ID"/>
-	<input id="move" placeholder="x1,y2|x2,y2|x3,y3...."/>
+	<input id="move" placeholder="x1,y1|x2,y2|x3,y3...."/>
 	<input type="button" id="moveBtn" value="Move" />
 	
 	<hr>
