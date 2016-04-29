@@ -756,49 +756,4 @@ public class GameBoardTests
 		
 		return newBoard;
 	}
-	
-	/**
-	 * Testing utility function to provide a visual of a GameBoard.
-	 * If both showSymbol and showID are false, the default is to show
-	 * just the ID.
-	 * 
-	 * @param board A game board to print
-	 * @param showSymbol True if you want to show the symbols, false otherwise
-	 * @param showID True if you want to show the piece IDs, false otherwise
-	 */
-	private void printBoard(GameBoard board)
-	{
-		String ret = "";
-		GamePiece piece;
-		int id;
-		int[][] boardRep = board.getBoard();
-		
-		for (int row = 0; row < GameBoard.SIZE; row++)
-		{
-			for (int col = 0; col < GameBoard.SIZE; col++)
-			{
-				id = boardRep[row][col];
-				if (id < 0)
-				{
-					ret += " ";
-					
-					if (row == 0 || row == GameBoard.SIZE - 1 ||
-						col == 0 || col == GameBoard.SIZE - 1)
-						ret += "=";
-					else
-						ret += "-";
-				}
-				else
-				{
-					ret += String.format("%2d", id);
-				}
-				
-				if (col != GameBoard.SIZE - 1)
-					ret += " ";
-			}
-			ret += "\n";
-		}
-		
-		System.out.println(ret);
-	}
 }
