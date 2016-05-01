@@ -17,12 +17,23 @@ public class UserRegistrationRequestDto {
 
 	@NotBlank
 	@Size(min=10, max=32)
-	@Pattern(regexp="^[A-Za-z0-9_!#$%+=@()]*$", message="passwords can only contain letters, numbers, and characters _ ! # $ % + = @ ( )")
+	/*Pattern breakdown:
+	 * ^ 					Start
+	 * (?=.*[A-Z]) 			Must contain at least one upper case letter
+	 * (?=.*[_!#$%+=@()]) 	Must contain at least one special character
+	 * (?=.*[0-9]) 			Must contain at least one number
+	 * (?=.*[a-z]) 			Must contain at least one lower case letter
+	 * .*					Of any length (length restricted by @Size)
+	 * $ 					End
+	 * */
+	@Pattern(regexp="^(?=.*[A-Z])(?=.*[_!#$%+=@()])(?=.*[0-9])(?=.*[a-z]).*$",
+		message="passwords can only contain letters, numbers, and characters _ ! # $ % + = @ ( )")
 	private String password;
 
 	@NotBlank
 	@Size(min=10, max=32)
-	@Pattern(regexp="^[A-Za-z0-9_!#$%+=@()]*$", message="passwords can only contain letters, numbers, and characters _ ! # $ % + = @ ( )")
+	@Pattern(regexp="^(?=.*[A-Z])(?=.*[_!#$%+=@()])(?=.*[0-9])(?=.*[a-z]).*$",
+		message="passwords can only contain letters, numbers, and characters _ ! # $ % + = @ ( )")
 	private String passwordConfirm;
 	
 	public UserRegistrationRequestDto(){}
