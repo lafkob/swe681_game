@@ -30,11 +30,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
-			.authorizeRequests()
+			.authorizeRequests() // authorize http requests
 				.antMatchers("/register.jsp", "/api/register", "/js/**", "/css/**", "/api/ping").permitAll()
-				.anyRequest().authenticated()
+				.anyRequest().authenticated() // anything not matching the above patterns requires authentication
 				.and()
-			.formLogin().and()
-			.httpBasic();
+			.formLogin().and() // enable form login
+			.httpBasic(); // enable basic http login
+		
+		http
+			.sessionManagement()
+				.maximumSessions(1).and() // only 1 session per user
+				.enableSessionUrlRewriting(false); // do not write sessionids into URLs
 	}
 }
