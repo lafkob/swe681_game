@@ -68,7 +68,7 @@ public class GameAuditListResponseDto extends GameResponseDto {
 		private final long userId;
 		private final String move;
 		
-		private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		public AuditRecordResponseDto(AuditModel model) {
 			this.timestamp = DATE_FORMAT.format(model.getTimeStamp());
