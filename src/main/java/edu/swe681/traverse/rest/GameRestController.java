@@ -81,9 +81,9 @@ public class GameRestController {
 		// this will set all the initial internal states up properly!
 		GameBoard board = new GameBoard(gameId, userId, true);
 		writeBoardToDatabase(board);
-		LOG.info(String.format("User %s started game %d", principal.getName(), gameId));
-		LOG.info(String.format("Starting line configurations for game %d are - %s", gameId,
-				startingLineLayoutToString(board)));
+		LOG.info("User %s started game %d", principal.getName(), gameId);
+		LOG.info("Starting line configurations for game %d are - %s", gameId,
+				startingLineLayoutToString(board));
 		auditDao.addAuditLine(gameId, new Date(), userId, null, principal.getName() + " started game.");
 		auditDao.addAuditLine(gameId, new Date(), userId, null, "Starting line configurations - " +
 				startingLineLayoutToString(board));
@@ -116,7 +116,7 @@ public class GameRestController {
 		GameBoard board = gameModelToGameBoard(game);
 		board = board.playerQuit(user.getId());
 		writeBoardToDatabase(board);
-		LOG.info(String.format("User %s quit game %d", principal.getName(), dto.getGameId()));
+		LOG.info("User %s quit game %d", principal.getName(), dto.getGameId());
 		auditDao.addAuditLine(dto.getGameId(), new Date(), user.getId(), null, principal.getName() + " quit game.");
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
@@ -157,7 +157,7 @@ public class GameRestController {
 		GameBoard board = gameModelToGameBoard(game);
 		board = board.registerPlayerTwo(userId);
 		writeBoardToDatabase(board);
-		LOG.info(String.format("User %s joined game %d", principal.getName(), dto.getGameId()));
+		LOG.info("User %s joined game %d", principal.getName(), dto.getGameId());
 		auditDao.addAuditLine(dto.getGameId(), new Date(), userId, null, principal.getName() + " joined game.");
 		
 		return new GameStatusResponseDto(dto.getGameId(), board.getBoard(), board.getGameState().getCurrentPlayerID(),
@@ -226,8 +226,8 @@ public class GameRestController {
 		
 		board = board.movePiece(dto.getPieceId(), convertCoordinatesToPoints(dto.getMoves()));
 		writeBoardToDatabase(board);
-		LOG.info(String.format("Game %d, user %s: Move made, piece %d to %s", dto.getGameId(), principal.getName(),
-				dto.getPieceId(), coordinatesToString(dto.getMoves())));
+		LOG.info("Game %d, user %s: Move made, piece %d to %s", dto.getGameId(), principal.getName(),
+				dto.getPieceId(), coordinatesToString(dto.getMoves()));
 		auditDao.addAuditLine(dto.getGameId(), new Date(), user.getId(), dto.getPieceId(), coordinatesToString(dto.getMoves()));
 		
 		return new GameStatusResponseDto(dto.getGameId(), board.getBoard(), board.getGameState().getCurrentPlayerID(),

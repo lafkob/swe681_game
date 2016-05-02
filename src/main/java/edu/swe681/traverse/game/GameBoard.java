@@ -192,15 +192,15 @@ public final class GameBoard
 		
 		if (this.gameState.getStatus() != GameStatus.WAITING_FOR_PLAYER_TWO)
 		{
-			LOG.info(String.format("Game %d: User %d tried to register for game in an incorrect state.",
-					gameID, gameState.getCurrentPlayerID()));
+			LOG.info("Game %d: User %d tried to register for game in an incorrect state.",
+					gameID, gameState.getCurrentPlayerID());
 			throw new InvalidGameStateException("Player cannot be registered at this time.");
 		}
 		
 		if (playerID == null || playerID < 0)
 		{
-			LOG.error(String.format("Game %d: User ID was null or negative, which shouldn't happen "
-					+ "under normal circumstances.", gameID));
+			LOG.error("Game %d: User ID was null or negative, which shouldn't happen "
+					+ "under normal circumstances.", gameID);
 			throw new InvalidGameInputException("PlayerID must be positive.");
 		}
 		
@@ -208,8 +208,8 @@ public final class GameBoard
 		 * it in as a fail-safe anyway */
 		if (this.playerTwoID != null)
 		{
-			LOG.warn(String.format("Game %d: Tried to register player two while player two already "
-					+ "existed. This state should not be possible.", gameID));
+			LOG.warn("Game %d: Tried to register player two while player two already "
+					+ "existed. This state should not be possible.", gameID);
 			throw new InvalidGameStateException("Both players are already registered.");
 		}
 		
@@ -241,8 +241,8 @@ public final class GameBoard
 		/* Otherwise, the game can only be quit if it is still in play. */
 		if (this.gameState.getStatus() != GameStatus.PLAY)
 		{
-			LOG.info(String.format("Game %d: User %d tried to quit the game when it was already "
-					+ "completed.", gameID, gameState.getCurrentPlayerID()));
+			LOG.info("Game %d: User %d tried to quit the game when it was already "
+					+ "completed.", gameID, gameState.getCurrentPlayerID());
 			throw new InvalidGameStateException("Players may not forfeit at this time.");
 		}
 		
@@ -256,8 +256,8 @@ public final class GameBoard
 		}
 		else
 		{
-			LOG.info(String.format("Game %d: User %d tried to quit the game without being "
-					+ "a participant.", gameID, gameState.getCurrentPlayerID()));
+			LOG.info("Game %d: User %d tried to quit the game without being "
+					+ "a participant.", gameID, gameState.getCurrentPlayerID());
 			throw new InvalidGameInputException("The given player is not in the game.");
 		}
 		
@@ -316,9 +316,9 @@ public final class GameBoard
 	{
 		if (!(pieceID >= 0 && pieceID < Game.NUM_PIECES))
 		{
-			LOG.error(String.format("Game %d: getPieceLocation was called with an invalid piece ID (%d). "
+			LOG.error("Game %d: getPieceLocation was called with an invalid piece ID (%d). "
 					+ "This method is currently being called only by internal game engine classes, so this "
-					+ "shouldn't happen.", gameID, pieceID));
+					+ "shouldn't happen.", gameID, pieceID);
 			throw new InvalidGameInputException("The given piece ID must be between 1 and 15.");
 		}
 		
@@ -332,8 +332,8 @@ public final class GameBoard
 		}
 		
 		/* Unreachable code */
-		LOG.error(String.format("Game %d: The board for was searched for a valid piece (%d) and it was not "
-				+ "found. The board state must somehow be corrupted.", gameID, pieceID));
+		LOG.error("Game %d: The board for was searched for a valid piece (%d) and it was not "
+				+ "found. The board state must somehow be corrupted.", gameID, pieceID);
 		return null;
 	}
 	
@@ -405,15 +405,15 @@ public final class GameBoard
 		
 		if (gameState.getStatus() == GameStatus.WAITING_FOR_PLAYER_TWO)
 		{
-			LOG.info(String.format("Game %d: User %d attempted to make a move before the game began",
-					gameID, gameState.getCurrentPlayerID()));
+			LOG.info("Game %d: User %d attempted to make a move before the game began",
+					gameID, gameState.getCurrentPlayerID());
 			throw new InvalidGameStateException("Cannot make move while waiting for players.");
 		}
 		if (gameState.getStatus() == GameStatus.WIN || gameState.getStatus() == GameStatus.FORFEIT
 				|| gameState.getStatus() == GameStatus.ENDED)
 		{
-			LOG.info(String.format("Game %d: User %d attempted to make a move after the game had ended.",
-					gameID, gameState.getCurrentPlayerID()));
+			LOG.info("Game %d: User %d attempted to make a move after the game had ended.",
+					gameID, gameState.getCurrentPlayerID());
 			throw new InvalidGameStateException("Cannot make move. The game has ended.");
 		}
 		
