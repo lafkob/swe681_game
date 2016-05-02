@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.swe681.traverse.application.exception.BadRequestException;
+import edu.swe681.traverse.application.exception.NotFoundException;
 import edu.swe681.traverse.game.enums.GameStatus;
 import edu.swe681.traverse.model.GameModel;
 import edu.swe681.traverse.model.UserModel;
@@ -63,7 +63,7 @@ public class GameInfoRestController {
 	@RequestMapping(value="/game", method = RequestMethod.POST)
 	@ResponseBody
 	public GameAuditListResponseDto gameAudit(@Valid @RequestBody GameRequestDto dto, Principal principal)
-			throws BadRequestException {
+			throws NotFoundException {
 		// only allow if the game is finished!
 		final GameModel game = gamesDao.getGameById(dto.getGameId());
 		final UserModel user = usersDao.getUserByUsername(principal.getName());
@@ -74,7 +74,7 @@ public class GameInfoRestController {
 		if (!game.isUserInGame(user.getId()) && !isGameInFinalState(game)) {
 			LOG.info("Attempt to view game audit for game in progress. User: " + principal.getName() + " GameID: "
 					+ dto.getGameId());
-			throw new BadRequestException("Game history not found");
+			throw new NotFoundException("Game history not found");
 		}
 		
 		return new GameAuditListResponseDto(dto.getGameId(), auditDao.getAuditsByGameId(dto.getGameId()));
