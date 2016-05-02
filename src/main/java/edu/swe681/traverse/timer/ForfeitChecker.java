@@ -52,7 +52,7 @@ public class ForfeitChecker {
 	 */
 	@Scheduled(fixedRate = 300000)
 	public void processForfeits() {
-		LOG.info("Running forfeit process job");
+		LOG.debug("Running forfeit process job");
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.MINUTE, 0 - TIMEOUT_MINUTES);
 		

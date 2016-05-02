@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
@@ -25,6 +28,7 @@ import edu.swe681.traverse.model.GameModel;
  */
 public final class GameBoard
 {
+	private static final Logger LOG = LoggerFactory.getLogger(GameBoard.class);
 	/* The size of the board. Note that if we were to add
 	 * two other players, we'd have to do quite a bit of adjusting
 	 * to the checks. */
@@ -188,18 +192,26 @@ public final class GameBoard
 		
 		if (this.gameState.getStatus() != GameStatus.WAITING_FOR_PLAYER_TWO)
 		{
+			LOG.info(String.format("Game %d: User %d tried to register for game in an incorrect state.",
+					gameID, gameState.getCurrentPlayerID()));
 			throw new InvalidGameStateException("Player cannot be registered at this time.");
 		}
 		
 		if (playerID == null || playerID < 0)
 		{
+			LOG.error(String.format("Game %d: User ID was null or negative, which shouldn't happen "
+					+ "under normal circumstances.", gameID));
 			throw new InvalidGameInputException("PlayerID must be positive.");
 		}
 		
 		/* With the way statuses change this is unreachable, but I thought I'd keep
 		 * it in as a fail-safe anyway */
 		if (this.playerTwoID != null)
+		{
+			LOG.warn(String.format("Game %d: Tried to register player two while player two already "
+					+ "existed. This state should not be possible.", gameID));
 			throw new InvalidGameStateException("Both players are already registered.");
+		}
 		
 		newBoard.playerTwoID = playerID;
 		newBoard.gameState = gameState.updateStatus(GameStatus.PLAY).updatePlayer(playerOneID);
@@ -229,6 +241,8 @@ public final class GameBoard
 		/* Otherwise, the game can only be quit if it is still in play. */
 		if (this.gameState.getStatus() != GameStatus.PLAY)
 		{
+			LOG.info(String.format("Game %d: User %d tried to quit the game when it was already "
+					+ "completed.", gameID, gameState.getCurrentPlayerID()));
 			throw new InvalidGameStateException("Players may not forfeit at this time.");
 		}
 		
@@ -242,6 +256,8 @@ public final class GameBoard
 		}
 		else
 		{
+			LOG.info(String.format("Game %d: User %d tried to quit the game without being "
+					+ "a participant.", gameID, gameState.getCurrentPlayerID()));
 			throw new InvalidGameInputException("The given player is not in the game.");
 		}
 		
@@ -300,6 +316,9 @@ public final class GameBoard
 	{
 		if (!(pieceID >= 0 && pieceID < Game.NUM_PIECES))
 		{
+			LOG.error(String.format("Game %d: getPieceLocation was called with an invalid piece ID (%d). "
+					+ "This method is currently being called only by internal game engine classes, so this "
+					+ "shouldn't happen.", gameID, pieceID));
 			throw new InvalidGameInputException("The given piece ID must be between 1 and 15.");
 		}
 		
@@ -313,6 +332,8 @@ public final class GameBoard
 		}
 		
 		/* Unreachable code */
+		LOG.error(String.format("Game %d: The board for was searched for a valid piece (%d) and it was not "
+				+ "found. The board state must somehow be corrupted.", gameID, pieceID));
 		return null;
 	}
 	
@@ -383,10 +404,18 @@ public final class GameBoard
 		Point start;
 		
 		if (gameState.getStatus() == GameStatus.WAITING_FOR_PLAYER_TWO)
+		{
+			LOG.info(String.format("Game %d: User %d attempted to make a move before the game began",
+					gameID, gameState.getCurrentPlayerID()));
 			throw new InvalidGameStateException("Cannot make move while waiting for players.");
+		}
 		if (gameState.getStatus() == GameStatus.WIN || gameState.getStatus() == GameStatus.FORFEIT
 				|| gameState.getStatus() == GameStatus.ENDED)
+		{
+			LOG.info(String.format("Game %d: User %d attempted to make a move after the game had ended.",
+					gameID, gameState.getCurrentPlayerID()));
 			throw new InvalidGameStateException("Cannot make move. The game has ended.");
+		}
 		
 		newBoard = new GameBoard(this);
 		start = getPieceLocation(pieceID);
@@ -468,7 +497,7 @@ public final class GameBoard
 		/* There are too many destinations.*/
 		if (dests.size() > MOVE_LIMIT)
 		{
-			throw new InvalidGameInputException("Too many moves requested. The limit is 20.");
+			throw new InvalidGameInputException("Too many moves requested. The limit is 10.");
 		}
 		
 		/* That is not the player's piece */
@@ -480,8 +509,8 @@ public final class GameBoard
 			currentPlayer = Player.TWO;
 		if (piece.getPlayer() != currentPlayer)
 		{
-			throw new IllegalPieceSelectionException(String.format("Illegal piece selection. "
-					+ "That is PLAYER %s\'s piece.", piece.getPlayer()));
+			throw new IllegalPieceSelectionException("Illegal piece selection. "
+					+ "That is your opponent's piece.");
 		}
 		
 		/* A pieces's final destination cannot be within any starting area unless it
@@ -535,11 +564,10 @@ public final class GameBoard
 		if (!(dest.x >= 0 && dest.x < SIZE &&
 			  dest.y >= 0 && dest.y < SIZE))
 		{
-			throw new InvalidGameInputException(String.format("The location [%d,%d] is not "
-					+ "on the board.", dest.x, dest.y), start, dest);
+			throw new InvalidGameInputException("", start, dest);
 		}
 		
-		/* Probably shouldn't just move the piece to the same location */
+		/* Can't just move the piece to the same location */
 		if (start.equals(dest))
 		{
 			throw new IllegalMoveException("", start, dest);
@@ -644,7 +672,9 @@ public final class GameBoard
 		{
 			/* If a jump has already been made, then can't move single spaces */
 			if (this.jumpMade)
+			{
 				throw new IllegalMultiMoveException("", start, dest);
+			}
 		}
 		else
 		{
@@ -769,8 +799,7 @@ public final class GameBoard
 		
 		/* Save and remove the jump attribute so it doesn't affect the check */
 		jumpMadeStore = this.jumpMade;
-		this.jumpMade = false;
-		
+		this.jumpMade = false;		
 		
 		/* There are two levels of distances - those to examine
 		 * possible moves in the ring just around the piece,
@@ -816,6 +845,7 @@ public final class GameBoard
 		}
 		
 		this.jumpMade = jumpMadeStore;
+
 		return false;
 	}
 	

@@ -19,12 +19,12 @@
     	</rollingPolicy>
     	
     	<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-    		<maxFileSize>10KB</maxFileSize>
+    		<maxFileSize>1MB</maxFileSize>
     	</triggeringPolicy>
     	
     	<encoder>
         	<pattern>
-        		%d{yyyy-MM-dd HH:mm:ss} - %msg%n
+        		%d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n
         	</pattern>
     	</encoder>
 	</appender>
@@ -54,6 +54,11 @@
 	</logger>
 	
 	<logger name="edu.swe681.traverse.rest" level="info" additivity="false">
+		<appender-ref ref="CONTROLLER" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+	
+	<logger name="edu.swe681.traverse.game" level="info" additivity="false">
 		<appender-ref ref="CONTROLLER" />
 		<appender-ref ref="STDOUT" />
 	</logger>
