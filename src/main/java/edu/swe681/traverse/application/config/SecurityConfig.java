@@ -1,8 +1,12 @@
 package edu.swe681.traverse.application.config;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,7 +15,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @EnableWebSecurity
+@ComponentScan("edu.swe681.traverse")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+	
+	@Inject
+    private ApplicationEventPublisher applicationEventPublisher;
+	
 	@Autowired
 	DataSource dataSource;
 
@@ -19,8 +28,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-
-		auth.jdbcAuthentication()
+		auth.authenticationEventPublisher(new DefaultAuthenticationEventPublisher(applicationEventPublisher))
+			.jdbcAuthentication()
 			.dataSource(dataSource)
 			.passwordEncoder(encoder)
 			.usersByUsernameQuery("SELECT username,password_hash,enabled FROM users WHERE username=?")

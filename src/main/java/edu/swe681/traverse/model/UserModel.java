@@ -7,14 +7,16 @@ public class UserModel {
 	private long id;
 	private String username;
 	private String passwordHash;
+	private int authAttempts;
 	
 	public UserModel(){}
 
-	public UserModel(long id, String username, String passwordHash) {
+	public UserModel(long id, String username, String passwordHash, int authAttempts) {
 		super();
 		this.id = id;
 		this.username = username;
 		this.passwordHash = passwordHash;
+		this.authAttempts = authAttempts;
 	}
 
 	public long getId() {
@@ -41,10 +43,19 @@ public class UserModel {
 		this.passwordHash = passwordHash;
 	}
 
+	public int getAuthAttempts() {
+		return authAttempts;
+	}
+
+	public void setAuthAttempts(int authAttempts) {
+		this.authAttempts = authAttempts;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + authAttempts;
 		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((passwordHash == null) ? 0 : passwordHash.hashCode());
 		result = prime * result + ((username == null) ? 0 : username.hashCode());
@@ -60,6 +71,8 @@ public class UserModel {
 		if (getClass() != obj.getClass())
 			return false;
 		UserModel other = (UserModel) obj;
+		if (authAttempts != other.authAttempts)
+			return false;
 		if (id != other.id)
 			return false;
 		if (passwordHash == null) {
@@ -77,6 +90,7 @@ public class UserModel {
 
 	@Override
 	public String toString() {
-		return "UserModel [id=" + id + ", username=" + username + ", passwordHash=" + passwordHash + "]";
+		return "UserModel [id=" + id + ", username=" + username + ", passwordHash=" + passwordHash + ", authAttempts="
+				+ authAttempts + "]";
 	}
 }
