@@ -105,4 +105,18 @@ public class GlobalExceptionHandlers {
 	public MessageOnlyExceptionResponseDto notImplementedHandler(Exception e) {
 		return new MessageOnlyExceptionResponseDto("Method not yet implemented");
 	}
+	
+	/**
+	 * Handler for any other exceptions not covered above. Results in a 500 - Internal
+	 * Server Error status with a message.
+	 * 
+	 * @param e
+	 * @return
+	 */
+	@ExceptionHandler({Exception.class})
+	@ResponseBody
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	public MessageOnlyExceptionResponseDto catchAllHandler(Exception e) {
+		return new MessageOnlyExceptionResponseDto("An internal error has occurred, please contact admin");
+	}
 }
