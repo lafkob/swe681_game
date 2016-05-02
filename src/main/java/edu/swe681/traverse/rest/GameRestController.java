@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -81,7 +82,12 @@ public class GameRestController {
 		// this will set all the initial internal states up properly!
 		GameBoard board = new GameBoard(gameId, userId, true);
 		writeBoardToDatabase(board);
+		LOG.info(String.format("User %s started game %d", principal.getName(), gameId));
+		LOG.info(String.format("Starting line configurations for game %d are - %s", gameId,
+				startingLineLayoutToString(board)));
 		auditDao.addAuditLine(gameId, new Date(), userId, null, principal.getName() + " started game.");
+		auditDao.addAuditLine(gameId, new Date(), userId, null, "Starting line configurations - " +
+				startingLineLayoutToString(board));
 		return new GameResponseDto(gameId);
 	}
 	
@@ -111,6 +117,7 @@ public class GameRestController {
 		GameBoard board = gameModelToGameBoard(game);
 		board = board.playerQuit(user.getId());
 		writeBoardToDatabase(board);
+		LOG.info(String.format("User %s quit game %d", principal.getName(), dto.getGameId()));
 		auditDao.addAuditLine(dto.getGameId(), new Date(), user.getId(), null, principal.getName() + " quit game.");
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
@@ -143,7 +150,7 @@ public class GameRestController {
 		
 		// make sure user is not already in a game
 		if (gamesDao.isPlayerCurrentlyInAGame(userId)) {
-			LOG.info("Attempt to join a game while in another game. User: " + principal.getName() + " GameID (join): "
+			LOG.info("Attempt to join a game while in a game. User: " + principal.getName() + " GameID (join): "
 					+ dto.getGameId());
 			throw new BadRequestException("User already in a game");
 		}
@@ -151,6 +158,7 @@ public class GameRestController {
 		GameBoard board = gameModelToGameBoard(game);
 		board = board.registerPlayerTwo(userId);
 		writeBoardToDatabase(board);
+		LOG.info(String.format("User %s joined game %d", principal.getName(), dto.getGameId()));
 		auditDao.addAuditLine(dto.getGameId(), new Date(), userId, null, principal.getName() + " joined game.");
 		
 		return new GameStatusResponseDto(dto.getGameId(), board.getBoard(), board.getGameState().getCurrentPlayerID(),
@@ -219,6 +227,8 @@ public class GameRestController {
 		
 		board = board.movePiece(dto.getPieceId(), convertCoordinatesToPoints(dto.getMoves()));
 		writeBoardToDatabase(board);
+		LOG.info(String.format("Game %d, user %s: Move made, piece %d to %s", dto.getGameId(), principal.getName(),
+				dto.getPieceId(), coordinatesToString(dto.getMoves())));
 		auditDao.addAuditLine(dto.getGameId(), new Date(), user.getId(), dto.getPieceId(), coordinatesToString(dto.getMoves()));
 		
 		return new GameStatusResponseDto(dto.getGameId(), board.getBoard(), board.getGameState().getCurrentPlayerID(),
@@ -319,6 +329,33 @@ public class GameRestController {
 				builder.append(",(").append(coords.get(i).getX()).append(",").append(coords.get(i).getY()).append(")");
 			}
 		}
+		
+		return builder.toString();
+	}
+	
+	private String startingLineLayoutToString(GameBoard board)
+	{
+		StringBuilder builder = new StringBuilder();
+		int[][] tempBoard = board.getBoard();
+		
+		/* Player 1 row */
+		builder.append("Player 1: [");
+		/* Append the first one, no space */
+		builder.append(tempBoard[0][1]);
+		for (int i = 2; i < GameBoard.SIZE-1; i++)
+		{
+			builder.append(" ").append(tempBoard[0][i]);
+		}
+		
+		/* Player 2 row */
+		builder.append("], Player 2: [");
+		/* Append the first one, no space */
+		builder.append(tempBoard[GameBoard.SIZE-1][1]);
+		for (int i = 2; i < GameBoard.SIZE-1; i++)
+		{
+			builder.append(" ").append(tempBoard[GameBoard.SIZE-1][i]);
+		}
+		builder.append("]");
 		
 		return builder.toString();
 	}
