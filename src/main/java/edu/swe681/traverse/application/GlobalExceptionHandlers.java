@@ -1,5 +1,7 @@
 package edu.swe681.traverse.application;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,6 +23,7 @@ import edu.swe681.traverse.rest.dto.response.ValidationExceptionResponseDto;
  */
 @ControllerAdvice
 public class GlobalExceptionHandlers {
+	private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandlers.class);
 	
 	/**
 	 * Handler for bean annotation validation exceptions to return 400 - Bad
@@ -117,6 +120,7 @@ public class GlobalExceptionHandlers {
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
 	public MessageOnlyExceptionResponseDto catchAllHandler(Exception e) {
+		LOG.error("Unexpected exception caught in the catch-all exception handler.", e);
 		return new MessageOnlyExceptionResponseDto("An internal error has occurred, please contact admin");
 	}
 }
