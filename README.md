@@ -3,9 +3,9 @@
 This is our secure game written for SWE 681 in Spring 2016. Here's some information on the game Traverse: https://boardgamegeek.com/boardgame/3313/traverse.
 
 ## Technology
- -Java/Spring
- -REST + a little MVC
- -MySQL
+ - Java/Spring
+ - REST + a little MVC
+ - MySQL
 
 ## Tomcat setup
 Replace the context.xml in the tomcat config directory with the one provided under /config. You'll also need to put the password for your database in there.
